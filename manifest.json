@@ -1,0 +1,8 @@
+{
+  "id": "url-to-markdown",
+  "name": "URL to Markdown",
+  "main": "dist/index.js",
+  "description": "Converts pasted or typed URLs into Markdown links with titles and favicons",
+  "author": "Your Name",
+  "version": "0.1.0"
+}

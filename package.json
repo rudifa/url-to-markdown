@@ -1,0 +1,15 @@
+{
+  "name": "url-to-markdown",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@logseq/libs": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "typescript": "^5.0.0"
+  }
+}
