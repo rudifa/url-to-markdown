@@ -5,7 +5,10 @@
     "type": "module",
     "scripts": {
         "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser && cp index.html dist/",
-        "dev": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser --watch && cp index.html dist/"
+        "dev": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser --watch && cp index.html dist/",
+        "test": "vitest run",
+        "test:watch": "vitest --watch",
+        "test:ui": "vitest --ui"
     },
     "dependencies": {
         "@logseq/libs": "^0.0.17"
@@ -13,8 +16,10 @@
     "devDependencies": {
         "@types/dompurify": "^3.0.5",
         "@types/node": "^24.1.0",
+        "@vitest/ui": "^3.2.4",
         "esbuild": "^0.25.8",
-        "typescript": "^5.0.0"
+        "typescript": "^5.0.0",
+        "vitest": "^3.2.4"
     },
     "logseq": {
         "id": "_ollalogvj"
