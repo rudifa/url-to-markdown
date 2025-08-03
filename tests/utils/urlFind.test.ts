@@ -3,7 +3,7 @@ import {
   findFormattedURLs,
   findRawURLs,
   analyzeBlockURLs,
-} from "../src/urlUtils";
+} from "../../src/utils/urlFind.js";
 
 // Test data - simplified
 const testCasesSimple = {
