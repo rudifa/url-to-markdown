@@ -10,7 +10,7 @@ import {fetchPageTitle} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 2.8.1");
+  console.log("main url-to-markdown 3.0.0");
 
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {

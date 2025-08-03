@@ -152,6 +152,44 @@ tests/
 │   └── metadata.test.ts    # Metadata fetching tests (mock + web)
 ```
 
+## Visual Testing
+
+The project includes a comprehensive visual test runner for manual testing and development.
+
+### Visual Test Scripts
+
+| Command                     | Description                  | Access                                   |
+| --------------------------- | ---------------------------- | ---------------------------------------- |
+| `npm run build:visual-test` | Build visual test runner     | Creates `dist/visual-test.html`          |
+| `npm run dev:visual-test`   | Development mode with watch  | Auto-rebuilds on file changes            |
+| `npm run serve:visual-test` | Build and serve visual tests | <http://127.0.0.1:3003/visual-test.html> |
+
+### Visual Test Features
+
+- **URL Detection Testing**: Interactive table showing how different text inputs are parsed
+- **Real Metadata Fetching**: Live API calls with timing, icons, and error handling
+- **Production Code Testing**: Uses actual production modules (not copies)
+- **Professional Interface**: Clean tables, loading states, status indicators
+
+### Manual Visual Testing
+
+```bash
+# Option 1: Use npm script (recommended)
+npm run serve:visual-test
+# Opens server at <http://127.0.0.1:3003/visual-test.html>
+
+# Option 2: Manual server setup
+npm run build:visual-test
+cd dist
+python3 -m http.server 3003
+# Navigate to <http://localhost:3003/visual-test.html>
+
+# Option 3: VS Code Live Server
+# Install Live Server extension, then right-click dist/visual-test.html
+```
+
+The visual test runner automatically displays URL detection results and provides a button to test real metadata fetching from various popular websites.
+
 ### CI/CD Recommendations
 
 ```yaml
