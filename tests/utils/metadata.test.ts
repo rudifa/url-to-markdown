@@ -386,8 +386,7 @@ describe("fetchPageTitle from the web", () => {
   });
 
   it("should handle non-existent domains gracefully", async () => {
-    const invalidUrl =
-      "https://this-domain-definitely-does-not-exist-12345.com";
+    const invalidUrl = "this-domain-definitely-does-not-exist-12345.com";
     const result = await fetchPageTitle(invalidUrl);
 
     // Should fallback to URL as title when fetch fails

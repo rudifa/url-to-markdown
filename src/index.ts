@@ -10,7 +10,7 @@ import {fetchPageTitle} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 2.8");
+  console.log("main url-to-markdown 2.8.1");
 
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {
@@ -37,7 +37,7 @@ async function processBlockForURLs(blockUuid: string) {
     }
 
     const content = block.content;
-    console.log(`📝 Block content: ${content}`);
+    console.log(`📝 Block ${blockUuid} content (input): ${content}`);
 
     // Analyze URLs in the content using urlFind
     const urlAnalysis = analyzeBlockURLs(content);
@@ -77,11 +77,13 @@ async function processBlockForURLs(blockUuid: string) {
 
     // Update the block
     await logseq.Editor.updateBlock(blockUuid, updatedContent);
-    console.log(`✅ Updated block ${blockUuid} content:\n${updatedContent}\n`);
+    console.log(
+      `✅ Block ${blockUuid} content (updated):\n${updatedContent}\n`
+    );
 
     if (urlAnalysis.raw.length > 1) {
       console.log(
-        `📝 Block has ${
+        `📝 Block ${blockUuid} has ${
           urlAnalysis.raw.length - 1
         } more raw URL(s) - will be processed in next change event`
       );
