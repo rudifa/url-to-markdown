@@ -1,6 +1,5 @@
 import "@logseq/libs";
-import {analyzeBlockURLs} from "./utils/urlFind";
-import {fetchPageTitle} from "./utils/metadata";
+import {processBlockContentForURLs} from "./utils/metadata";
 
 // Use an async IIFE to run the main function after Logseq is ready.
 (async () => {
@@ -10,7 +9,7 @@ import {fetchPageTitle} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 3.0.0");
+  console.log("main url-to-markdown 3.3.0");
 
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {
@@ -32,60 +31,22 @@ async function processBlockForURLs(blockUuid: string) {
     // Get the block content
     const block = await logseq.Editor.getBlock(blockUuid);
     if (!block?.content) {
-      console.warn(`No block content found for ${blockUuid}`);
+      //   console.warn(`No block content found for ${blockUuid}`);
       return;
     }
 
     const content = block.content;
-    console.log(`📝 Block ${blockUuid} content (input): ${content}`);
+    // console.log(`📝 Block ${blockUuid} content (input): ${content}`);
 
-    // Analyze URLs in the content using urlFind
-    const urlAnalysis = analyzeBlockURLs(content);
+    // Process block content for URLs
+    const updatedContent = await processBlockContentForURLs(content);
 
-    // Check if there are any raw URLs to process
-    if (urlAnalysis.raw.length === 0) {
-      console.log(`No raw URLs found in block`);
-      return;
-    }
-
-    console.log(`🔗 Found ${urlAnalysis.raw.length} raw URL(s) to process`);
-
-    // Process only the FIRST raw URL to avoid coordinate shifting issues
-    // Subsequent URLs will be processed in the next DB change event
-    const firstRawURL = urlAnalysis.raw[0];
-    const {url} = firstRawURL;
-    console.log(`🔗 Processing first URL: ${url}`);
-
-    if (!isValidURL(url)) {
-      console.log(`❌ Invalid URL: ${url}`);
-      return;
-    }
-
-    // Fetch page title and create markdown
-    console.log(`🌐 Fetching title for: ${url}`);
-    const {title} = await fetchPageTitle(url);
-
-    // Create markdown - just use the title for clean formatting
-    const markdown = `[${title}](${url})`;
-    console.log(`✨ Generated markdown: ${markdown}`);
-
-    // Replace the URL with markdown using precise coordinates
-    const updatedContent =
-      content.substring(0, firstRawURL.start) +
-      markdown +
-      content.substring(firstRawURL.end);
-
-    // Update the block
-    await logseq.Editor.updateBlock(blockUuid, updatedContent);
-    console.log(
-      `✅ Block ${blockUuid} content (updated):\n${updatedContent}\n`
-    );
-
-    if (urlAnalysis.raw.length > 1) {
+    // Only update the block if content actually changed
+    if (updatedContent !== content) {
+      // Update the block
+      await logseq.Editor.updateBlock(blockUuid, updatedContent);
       console.log(
-        `📝 Block ${blockUuid} has ${
-          urlAnalysis.raw.length - 1
-        } more raw URL(s) - will be processed in next change event`
+        `✅ Block ${blockUuid} content (updated):\n${updatedContent}\n`
       );
     }
   } catch (error) {
@@ -96,15 +57,6 @@ async function processBlockForURLs(blockUuid: string) {
 function attachToCurrentEditor() {
   // This function is no longer needed with the new approach
   console.log("attachToCurrentEditor - not needed with block-based approach");
-}
-
-function isValidURL(str: string): boolean {
-  try {
-    new URL(str);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function debounce(fn: (...args: any[]) => void, delay = 300) {

@@ -15,6 +15,8 @@ const testCasesSimple = {
   rawURLWithQuery: "Search on https://example.com?q=logseq&page=1 for results",
   rawURLWithComplexQuery:
     "Visit https://api.github.com/repos/logseq/logseq?sort=updated&direction=desc&per_page=50 to see data",
+  rawURLWithTrailingPunctuation:
+    "I use https://astro.build/, built on top of node.",
 };
 
 // Test data - combined
@@ -75,6 +77,14 @@ describe("findFormattedURLs in simple testCases", () => {
     );
     expect(result[0].start).toBe(6);
     expect(result[0].end).toBe(88);
+  });
+
+  it("should find raw URL without trailing punctuation", () => {
+    const result = findRawURLs(testCasesSimple.rawURLWithTrailingPunctuation);
+    expect(result).toHaveLength(1);
+    expect(result[0].url).toBe("https://astro.build/");
+    expect(result[0].start).toBe(6);
+    expect(result[0].end).toBe(26); // "I use " = 6 chars, "https://astro.build/" = 20 chars, so 6+20=26
   });
 
   it("should analyze block URLs in singleFormattedURL", () => {
