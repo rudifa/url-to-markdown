@@ -298,4 +298,22 @@ describe("processBlockContentForURLs", () => {
       "https://api.microlink.io/?url=https%3A%2F%2Fexample.com"
     );
   });
+
+  it("should handle URLs with trailing punctuation correctly", async () => {
+    mockFetchSuccess({
+      title: "Astro - The web framework for content-driven websites",
+      hasIcon: true,
+    });
+
+    const content = "I use https://astro.build/, built on top of node.";
+    const result = await processBlockContentForURLs(content);
+
+    // Should process the URL without the trailing comma
+    expect(result).toBe(
+      "I use [Astro - The web framework for content-driven websites](https://astro.build/), built on top of node."
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://api.microlink.io/?url=https%3A%2F%2Fastro.build%2F"
+    );
+  });
 });

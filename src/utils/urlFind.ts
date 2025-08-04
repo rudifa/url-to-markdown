@@ -53,14 +53,23 @@ export function findRawURLs(content: string): URLLocation[] {
     end: url.end,
   }));
 
-  // Regex for URLs (more comprehensive than the original)
+  // Regex for URLs - more precise to avoid trailing punctuation
   const urlRegex = /https?:\/\/[^\s\])]+/g;
 
   let match;
   while ((match = urlRegex.exec(content)) !== null) {
-    const url = match[0];
-    const start = match.index;
-    const end = start + url.length;
+    let url = match[0];
+    let start = match.index;
+    let end = start + url.length;
+
+    // Remove common trailing punctuation that's likely not part of the URL
+    const trailingPunctuation = /[.,;:!?]+$/;
+    const trimmed = url.replace(trailingPunctuation, "");
+
+    if (trimmed !== url) {
+      url = trimmed;
+      end = start + url.length;
+    }
 
     // Check if this URL is already part of a formatted link
     const isAlreadyFormatted = formattedRanges.some(
