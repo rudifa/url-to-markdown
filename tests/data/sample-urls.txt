@@ -1,0 +1,11 @@
+# samples intended for pasting into a logseq page
+
+My home on the www: https://github.com
+
+My favorite testing framework: https://vitest.dev
+
+My preferred note taking application: https://logseq.com
+
+My favourite framework for building web applications: https://astro.build/, built on top of https://nodejs.org/fr environment.
+
+I use https://astro.build/, built on top of node.
