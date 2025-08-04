@@ -4,7 +4,7 @@ This folder contains test files for the URL to Markdown LogSeq plugin.
 
 ## Test Files
 
-### `urlUtils.test.ts`
+### `urlFind.test.ts`
 
 - **Purpose**: Comprehensive TypeScript tests for URL detection utilities using Vitest framework
 - **Functions tested**: `findFormattedURLs`, `findRawURLs`, `findRawURLsAtEnd`, `analyzeBlockURLs`
@@ -89,7 +89,7 @@ runBrowserTests();
 These utilities are designed to be integrated into the main plugin. Example usage:
 
 ```typescript
-import {findRawURLsAtEnd} from "../src/urlUtils.js";
+import {findRawURLsAtEnd} from "../src/utils/urlFind.js";
 
 async function processBlock(blockUuid: string) {
   const block = await logseq.Editor.getBlock(blockUuid);

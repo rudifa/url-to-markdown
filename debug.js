@@ -1,5 +1,5 @@
-// Debug script to  console.log(`Raw URLs:`, JSON.stringify(findRawURLs(content), null, 2));et actual results for fixing tests
-import { findFormattedURLs, findRawURLs } from '../src/urlUtils.js';
+// Debug script to get actual results for fixing tests
+import { findFormattedURLs, findRawURLs } from '../src/utils/urlFind.js';
 
 const testCases = {
   singleFormattedURL: "Check out [Example Site](https://example.com) for more info",

@@ -6,6 +6,8 @@ export default defineConfig({
     include: ["tests/**/*.{test,spec}.{js,ts}"],
     // Environment setup
     environment: "node",
+    // Global setup
+    setupFiles: ["./tests/setup.ts"],
   },
   // Resolve configuration for imports
   resolve: {
