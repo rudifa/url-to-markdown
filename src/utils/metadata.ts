@@ -1,6 +1,8 @@
 // URL Metadata Utilities for LogSeq Block Content
 // These functions fetch metadata (title, icon, etc.) from URLs
 
+import {analyzeBlockURLs} from "./urlFind";
+
 export interface URLMetadata {
   title: string;
   icon?: string;
@@ -89,7 +91,99 @@ export async function fetchPageTitle(url: string): Promise<URLMetadata> {
   }
 }
 
+/**
+ * Validates if a string is a valid URL
+ * @param str - The string to validate
+ * @returns boolean indicating if the string is a valid URL
+ */
+export function isValidURL(str: string): boolean {
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Processes a URL to create markdown with title
+ * @param url - The URL to process
+ * @returns Promise with markdown string or null if invalid URL
+ */
+export async function processURLToMarkdown(
+  url: string
+): Promise<string | null> {
+  console.log(`🔗 Processing URL: ${url}`);
+
+  if (!isValidURL(url)) {
+    console.log(`❌ Invalid URL: ${url}`);
+    return null;
+  }
+
+  // Fetch page title and create markdown
+  console.log(`🌐 Fetching title for: ${url}`);
+  const {title} = await fetchPageTitle(url);
+
+  // Create markdown - just use the title for clean formatting
+  const markdown = `[${title}](${url})`;
+  console.log(`✨ Generated markdown: ${markdown}`);
+
+  return markdown;
+}
+
+/**
+ * Processes block content to convert the first raw URL to markdown
+ * @param content - The original block content
+ * @returns Promise with updated content or original content if no processing needed
+ */
+export async function processBlockContentForURLs(
+  content: string
+): Promise<string> {
+  console.log(`📝 Processing content: ${content}`);
+
+  // Analyze URLs in the content using urlFind
+  const urlAnalysis = analyzeBlockURLs(content);
+
+  // Check if there are any raw URLs to process
+  if (urlAnalysis.raw.length === 0) {
+    console.log(`No raw URLs found in block`);
+    return content; // Return unchanged content
+  }
+
+  console.log(`🔗 Found ${urlAnalysis.raw.length} raw URL(s) to process`);
+
+  // Process only the FIRST raw URL to avoid coordinate shifting issues
+  // Subsequent URLs will be processed in the next DB change event
+  const firstRawURL = urlAnalysis.raw[0];
+  const {url} = firstRawURL;
+
+  // Process URL to markdown
+  const markdown = await processURLToMarkdown(url);
+  if (!markdown) {
+    return content; // Return unchanged content if processing failed
+  }
+
+  // Replace the URL with markdown using precise coordinates
+  const updatedContent =
+    content.substring(0, firstRawURL.start) +
+    markdown +
+    content.substring(firstRawURL.end);
+
+  if (urlAnalysis.raw.length > 1) {
+    console.log(
+      `📝 Content has ${
+        urlAnalysis.raw.length - 1
+      } more raw URL(s) - will be processed in next change event`
+    );
+  }
+
+  return updatedContent;
+}
+
 // Default export for easy importing
 export default {
   fetchPageTitle,
+  isValidURL,
+  processURLToMarkdown,
+  processBlockContentForURLs,
 };
