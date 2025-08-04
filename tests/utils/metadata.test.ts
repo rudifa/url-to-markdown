@@ -250,7 +250,13 @@ describe("processBlockContentForURLs", () => {
     );
   });
 
-  it("should process only the first raw URL when multiple are present", async () => {
+  it("should process all raw URLs when multiple are present", async () => {
+    // Set up mock responses for both URLs
+    mockFetchSuccess({
+      title: "Second Site Title",
+      hasIcon: false,
+    });
+
     mockFetchSuccess({
       title: "First Site Title",
       hasIcon: false,
@@ -259,10 +265,14 @@ describe("processBlockContentForURLs", () => {
     const content = "Sites: https://first.com and https://second.com are good";
     const result = await processBlockContentForURLs(content);
 
+    // Both URLs should be processed (backwards order due to implementation)
     expect(result).toBe(
-      "Sites: [First Site Title](https://first.com) and https://second.com are good"
+      "Sites: [First Site Title](https://first.com) and [Second Site Title](https://second.com) are good"
     );
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://api.microlink.io/?url=https%3A%2F%2Fsecond.com"
+    );
     expect(mockFetch).toHaveBeenCalledWith(
       "https://api.microlink.io/?url=https%3A%2F%2Ffirst.com"
     );

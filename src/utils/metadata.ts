@@ -132,49 +132,48 @@ export async function processURLToMarkdown(
 }
 
 /**
- * Processes block content to convert the first raw URL to markdown
+ * Processes block content to convert all raw URLs to markdown
  * @param content - The original block content
  * @returns Promise with updated content or original content if no processing needed
  */
 export async function processBlockContentForURLs(
   content: string
 ): Promise<string> {
-  //   console.log(`📝 Processing content: ${content}`);
-
   // Analyze URLs in the content using urlFind
   const urlAnalysis = analyzeBlockURLs(content);
 
   // Check if there are any raw URLs to process
   if (urlAnalysis.raw.length === 0) {
-    // console.log(`No raw URLs found in block`);
     return content; // Return unchanged content
   }
 
   console.log(`🔗 Found ${urlAnalysis.raw.length} raw URL(s) to process`);
 
-  // Process only the FIRST raw URL to avoid coordinate shifting issues
-  // Subsequent URLs will be processed in the next DB change event
-  const firstRawURL = urlAnalysis.raw[0];
-  const {url} = firstRawURL;
+  // Process URLs backwards to avoid coordinate shifting issues
+  // When we replace URLs from last to first, the coordinates of earlier URLs remain valid
+  let updatedContent = content;
 
-  // Process URL to markdown
-  const markdown = await processURLToMarkdown(url);
-  if (!markdown) {
-    return content; // Return unchanged content if processing failed
-  }
+  for (let i = urlAnalysis.raw.length - 1; i >= 0; i--) {
+    const rawURL = urlAnalysis.raw[i];
+    const {url} = rawURL;
 
-  // Replace the URL with markdown using precise coordinates
-  const updatedContent =
-    content.substring(0, firstRawURL.start) +
-    markdown +
-    content.substring(firstRawURL.end);
+    // Process URL to markdown
+    const markdown = await processURLToMarkdown(url);
+    if (markdown) {
+      // Replace the URL with markdown using precise coordinates
+      updatedContent =
+        updatedContent.substring(0, rawURL.start) +
+        markdown +
+        updatedContent.substring(rawURL.end);
 
-  if (urlAnalysis.raw.length > 1) {
-    console.log(
-      `📝 Content has ${
-        urlAnalysis.raw.length - 1
-      } more raw URL(s) - will be processed in next change event`
-    );
+      console.log(
+        `✅ Processed URL ${i + 1}/${urlAnalysis.raw.length}: ${url}`
+      );
+    } else {
+      console.log(
+        `⚠️ Skipped invalid URL ${i + 1}/${urlAnalysis.raw.length}: ${url}`
+      );
+    }
   }
 
   return updatedContent;

@@ -9,7 +9,7 @@ import {processBlockContentForURLs} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 3.2.2");
+  console.log("main url-to-markdown 3.3.0");
 
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {
