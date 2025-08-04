@@ -139,14 +139,14 @@ export async function processURLToMarkdown(
 export async function processBlockContentForURLs(
   content: string
 ): Promise<string> {
-  console.log(`📝 Processing content: ${content}`);
+  //   console.log(`📝 Processing content: ${content}`);
 
   // Analyze URLs in the content using urlFind
   const urlAnalysis = analyzeBlockURLs(content);
 
   // Check if there are any raw URLs to process
   if (urlAnalysis.raw.length === 0) {
-    console.log(`No raw URLs found in block`);
+    // console.log(`No raw URLs found in block`);
     return content; // Return unchanged content
   }
 

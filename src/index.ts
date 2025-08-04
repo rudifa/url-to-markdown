@@ -9,7 +9,7 @@ import {processBlockContentForURLs} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 3.2.0");
+  console.log("main url-to-markdown 3.2.2");
 
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {
@@ -31,12 +31,12 @@ async function processBlockForURLs(blockUuid: string) {
     // Get the block content
     const block = await logseq.Editor.getBlock(blockUuid);
     if (!block?.content) {
-      console.warn(`No block content found for ${blockUuid}`);
+      //   console.warn(`No block content found for ${blockUuid}`);
       return;
     }
 
     const content = block.content;
-    console.log(`📝 Block ${blockUuid} content (input): ${content}`);
+    // console.log(`📝 Block ${blockUuid} content (input): ${content}`);
 
     // Process block content for URLs
     const updatedContent = await processBlockContentForURLs(content);
