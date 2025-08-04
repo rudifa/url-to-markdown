@@ -9,6 +9,32 @@ import {
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
+// Helper functions for creating test data
+function createMockResponse(data: any) {
+  return {
+    status: "success",
+    data,
+  };
+}
+
+function mockFetchSuccess(responseData: any) {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    json: async () => createMockResponse(responseData),
+  });
+}
+
+function mockFetchError(error: Error) {
+  mockFetch.mockRejectedValueOnce(error);
+}
+
+function mockFetchInvalidResponse(responseData: any) {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    json: async () => responseData,
+  });
+}
+
 describe("fetchPageTitle", () => {
   beforeEach(() => {
     mockFetch.mockClear();
@@ -18,216 +44,167 @@ describe("fetchPageTitle", () => {
     vi.restoreAllMocks();
   });
 
-  it("should fetch title and icon successfully", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
+  describe("successful responses", () => {
+    it("should fetch title and icon successfully", async () => {
+      mockFetchSuccess({
         title: "Example Website",
         logo: "https://example.com/logo.png",
         image: {
           url: "https://example.com/image.jpg",
         },
-      },
-    };
+      });
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
+      const result = await fetchPageTitle("https://example.com");
+
+      expect(result).toEqual({
+        title: "Example Website",
+        hasIcon: true,
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.microlink.io/?url=https%3A%2F%2Fexample.com"
+      );
     });
 
-    const result = await fetchPageTitle("https://example.com");
-
-    expect(result).toEqual({
-      title: "Example Website",
-      hasIcon: true,
-    });
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://api.microlink.io/?url=https%3A%2F%2Fexample.com"
-    );
-  });
-
-  it("should use image URL as icon when logo is not available", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
+    it("should use image URL as icon when logo is not available", async () => {
+      mockFetchSuccess({
         title: "Example Website",
         image: {
           url: "https://example.com/image.jpg",
         },
-      },
-    };
+      });
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
+      const result = await fetchPageTitle("https://example.com");
+
+      expect(result).toEqual({
+        title: "Example Website",
+        hasIcon: true,
+      });
     });
 
-    const result = await fetchPageTitle("https://example.com");
-
-    expect(result).toEqual({
-      title: "Example Website",
-      hasIcon: true,
-    });
-  });
-
-  it("should handle missing title by using URL as fallback", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
-        title: null,
-        logo: "https://example.com/logo.png",
-      },
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
-
-    const result = await fetchPageTitle("https://example.com");
-
-    expect(result).toEqual({
-      title: "https://example.com",
-      hasIcon: true,
-    });
-  });
-
-  it("should handle missing logo and image gracefully", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
+    it("should handle missing logo and image gracefully", async () => {
+      mockFetchSuccess({
         title: "Example Website",
         logo: null,
         image: null,
-      },
-    };
+      });
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+      const result = await fetchPageTitle("https://example.com");
 
-    const result = await fetchPageTitle("https://example.com");
-
-    expect(result).toEqual({
-      title: "Example Website",
-      hasIcon: false,
+      expect(result).toEqual({
+        title: "Example Website",
+        hasIcon: false,
+      });
     });
   });
 
-  it("should handle empty response data", async () => {
-    const mockResponse = {
-      status: "error",
-      data: {},
-    };
+  describe("fallback behavior", () => {
+    it("should handle missing title by using URL as fallback", async () => {
+      mockFetchSuccess({
+        title: null,
+        logo: "https://example.com/logo.png",
+      });
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+      const result = await fetchPageTitle("https://example.com");
 
-    const result = await fetchPageTitle("https://example.com");
-
-    expect(result).toEqual({
-      title: "https://example.com",
-      hasIcon: false,
-      note: "API may be rate-limited or unavailable",
+      expect(result).toEqual({
+        title: "https://example.com",
+        hasIcon: true,
+      });
     });
   });
 
-  it("should handle fetch errors gracefully", async () => {
-    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+  describe("error handling", () => {
+    it("should handle empty response data", async () => {
+      mockFetchInvalidResponse({
+        status: "error",
+        data: {},
+      });
 
-    const result = await fetchPageTitle("https://example.com");
+      const result = await fetchPageTitle("https://example.com");
 
-    expect(result).toEqual({
-      title: "https://example.com",
-      hasIcon: false,
-      note: "API may be rate-limited or unavailable",
+      expect(result).toEqual({
+        title: "https://example.com",
+        hasIcon: false,
+        note: "API may be rate-limited or unavailable",
+      });
+    });
+
+    it("should handle fetch errors gracefully", async () => {
+      mockFetchError(new Error("Network error"));
+
+      const result = await fetchPageTitle("https://example.com");
+
+      expect(result).toEqual({
+        title: "https://example.com",
+        hasIcon: false,
+        note: "API may be rate-limited or unavailable",
+      });
+    });
+
+    it("should handle JSON parse errors gracefully", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
+      });
+
+      const result = await fetchPageTitle("https://example.com");
+
+      expect(result).toEqual({
+        title: "https://example.com",
+        hasIcon: false,
+        note: "API may be rate-limited or unavailable",
+      });
     });
   });
 
-  it("should handle JSON parse errors gracefully", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => {
-        throw new Error("Invalid JSON");
-      },
-    });
-
-    const result = await fetchPageTitle("https://example.com");
-
-    expect(result).toEqual({
-      title: "https://example.com",
-      hasIcon: false,
-      note: "API may be rate-limited or unavailable",
-    });
-  });
-
-  it("should properly encode URLs with special characters", async () => {
-    const mockResponse = {
-      data: {
+  describe("URL encoding", () => {
+    it("should properly encode URLs with special characters", async () => {
+      mockFetchSuccess({
         title: "Search Results",
         logo: "https://example.com/logo.png",
-      },
-    };
+      });
 
-    mockFetch.mockResolvedValueOnce({
-      json: async () => mockResponse,
+      const urlWithQuery = "https://example.com/search?q=test query&sort=date";
+      await fetchPageTitle(urlWithQuery);
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.microlink.io/?url=https%3A%2F%2Fexample.com%2Fsearch%3Fq%3Dtest%20query%26sort%3Ddate"
+      );
     });
 
-    const urlWithQuery = "https://example.com/search?q=test query&sort=date";
-    await fetchPageTitle(urlWithQuery);
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://api.microlink.io/?url=https%3A%2F%2Fexample.com%2Fsearch%3Fq%3Dtest%20query%26sort%3Ddate"
-    );
-  });
-
-  it("should handle complex URLs with multiple parameters", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
+    it("should handle complex URLs with multiple parameters", async () => {
+      mockFetchSuccess({
         title: "GitHub Repository",
         logo: "https://github.com/logo.png",
-      },
-    };
+      });
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
+      const complexUrl =
+        "https://api.github.com/repos/user/repo?sort=updated&direction=desc&per_page=50";
+      const result = await fetchPageTitle(complexUrl);
+
+      expect(result.title).toBe("GitHub Repository");
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining("https://api.microlink.io/?url=")
+      );
     });
-
-    const complexUrl =
-      "https://api.github.com/repos/user/repo?sort=updated&direction=desc&per_page=50";
-    const result = await fetchPageTitle(complexUrl);
-
-    expect(result.title).toBe("GitHub Repository");
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("https://api.microlink.io/?url=")
-    );
   });
 
-  it("should return correct TypeScript types", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
+  describe("TypeScript types", () => {
+    it("should return correct TypeScript types", async () => {
+      mockFetchSuccess({
         title: "Test Site",
         logo: "https://test.com/logo.png",
-      },
-    };
+      });
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
+      const result: URLMetadata = await fetchPageTitle("https://test.com");
+
+      // TypeScript should enforce these types
+      expect(typeof result.title).toBe("string");
+      expect(typeof result.hasIcon).toBe("boolean");
     });
-
-    const result: URLMetadata = await fetchPageTitle("https://test.com");
-
-    // TypeScript should enforce these types
-    expect(typeof result.title).toBe("string");
-    expect(typeof result.hasIcon).toBe("boolean");
   });
 });
 
@@ -257,17 +234,9 @@ describe("processBlockContentForURLs", () => {
   });
 
   it("should convert first raw URL to markdown when page title fetch is successful", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
-        title: "Example Website Title",
-        logo: "https://example.com/logo.png",
-      },
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
+    mockFetchSuccess({
+      title: "Example Website Title",
+      logo: "https://example.com/logo.png",
     });
 
     const content = "Check out this site: https://example.com for more info";
@@ -282,17 +251,9 @@ describe("processBlockContentForURLs", () => {
   });
 
   it("should process only the first raw URL when multiple are present", async () => {
-    const mockResponse = {
-      status: "success",
-      data: {
-        title: "First Site Title",
-        hasIcon: false,
-      },
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
+    mockFetchSuccess({
+      title: "First Site Title",
+      hasIcon: false,
     });
 
     const content = "Sites: https://first.com and https://second.com are good";
@@ -316,7 +277,7 @@ describe("processBlockContentForURLs", () => {
   });
 
   it("should use URL as title when page title fetch fails", async () => {
-    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+    mockFetchError(new Error("Network error"));
 
     const content = "Check out https://example.com";
     const result = await processBlockContentForURLs(content);
