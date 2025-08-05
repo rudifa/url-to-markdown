@@ -1,14 +1,40 @@
 # URL to Markdown (Logseq Plugin)
 
-This plugin detects pasted URLs in the Logseq editor and replaces them with Markdown links that include the page title (and optionally favicon).
+This plugin detects pasted URLs in the Logseq editor and replaces them with Markdown links that include the page title and optionally favicon icons.
+
+## Features
+
+- **Automatic URL Detection**: Detects raw URLs in blocks and converts them to markdown links
+- **Page Title Fetching**: Automatically fetches and uses the actual page title
+- **Favicon Support**: Optionally adds favicon icons to links for visual enhancement
+- **Configurable Options**: Control favicon size, position, and enable/disable functionality
+- **Non-intrusive**: Only processes raw URLs, leaves existing markdown links unchanged
 
 ## Usage
+
+### Basic Usage
 
 Paste a URL in the editor and wait a moment — it will auto-convert to:
 
 ```md
 [Example Domain](https://example.com)
 ```
+
+### With Favicons Enabled
+
+When favicons are enabled, links will include the site's favicon:
+
+```md
+![github.com-favicon](https://www.google.com/s2/favicons?domain=github.com&sz=16) [GitHub](https://github.com)
+```
+
+## Configuration
+
+Access plugin settings through Logseq's Settings → Plugins → URL to Markdown:
+
+- **Enable Favicons**: Toggle favicon functionality on/off (default: true)
+- **Favicon Size**: Set favicon size in pixels (default: 16)
+- **Favicon Position**: Choose to show favicons before or after the link text (default: before)
 
 ## Plugin build
 

@@ -9,3 +9,10 @@ My preferred note taking application: https://logseq.com
 My favourite framework for building web applications: https://astro.build/, built on top of https://nodejs.org/fr environment.
 
 I use https://astro.build/, built on top of node.
+
+My repos
+
+https://github.com/rudifa/genealogy-astro
+
+
+

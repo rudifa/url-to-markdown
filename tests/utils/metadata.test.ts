@@ -3,6 +3,7 @@ import {
   fetchPageTitle,
   URLMetadata,
   processBlockContentForURLs,
+  addFaviconToMarkdownLink,
 } from "../../src/utils/metadata.js";
 
 // Mock fetch globally for mock tests
@@ -314,6 +315,97 @@ describe("processBlockContentForURLs", () => {
     );
     expect(mockFetch).toHaveBeenCalledWith(
       "https://api.microlink.io/?url=https%3A%2F%2Fastro.build%2F"
+    );
+  });
+});
+
+describe("addFaviconToMarkdownLink", () => {
+  it("should add favicon before markdown link by default", async () => {
+    const input = "[GitHub](https://github.com)";
+    const result = await addFaviconToMarkdownLink(input);
+
+    expect(result).toBe(
+      "![github.com-favicon](https://www.google.com/s2/favicons?domain=github.com&sz=16) [GitHub](https://github.com)"
+    );
+  });
+
+  it("should add favicon after markdown link when position is 'after'", async () => {
+    const input = "[GitHub](https://github.com)";
+    const result = await addFaviconToMarkdownLink(input, {position: "after"});
+
+    expect(result).toBe(
+      "[GitHub](https://github.com) ![github.com-favicon](https://www.google.com/s2/favicons?domain=github.com&sz=16)"
+    );
+  });
+
+  it("should use custom size when specified", async () => {
+    const input = "[GitHub](https://github.com)";
+    const result = await addFaviconToMarkdownLink(input, {size: 32});
+
+    expect(result).toBe(
+      "![github.com-favicon](https://www.google.com/s2/favicons?domain=github.com&sz=32) [GitHub](https://github.com)"
+    );
+  });
+
+  it("should use custom alt text template", async () => {
+    const input = "[GitHub](https://github.com)";
+    const customTemplate = (hostname: string) => `icon-${hostname}`;
+    const result = await addFaviconToMarkdownLink(input, {
+      altTextTemplate: customTemplate,
+    });
+
+    expect(result).toBe(
+      "![icon-github.com](https://www.google.com/s2/favicons?domain=github.com&sz=16) [GitHub](https://github.com)"
+    );
+  });
+
+  it("should handle URLs with paths and query parameters", async () => {
+    const input = "[NPM Package](https://www.npmjs.com/package/vitest)";
+    const result = await addFaviconToMarkdownLink(input);
+
+    expect(result).toBe(
+      "![www.npmjs.com-favicon](https://www.google.com/s2/favicons?domain=www.npmjs.com&sz=16) [NPM Package](https://www.npmjs.com/package/vitest)"
+    );
+  });
+
+  it("should handle subdomains correctly", async () => {
+    const input = "[API Docs](https://api.github.com/users)";
+    const result = await addFaviconToMarkdownLink(input);
+
+    expect(result).toBe(
+      "![api.github.com-favicon](https://www.google.com/s2/favicons?domain=api.github.com&sz=16) [API Docs](https://api.github.com/users)"
+    );
+  });
+
+  it("should return original string if not a valid markdown link", async () => {
+    const input = "Just some text with https://github.com";
+    const result = await addFaviconToMarkdownLink(input);
+
+    expect(result).toBe(input);
+  });
+
+  it("should return original string if URL is invalid", async () => {
+    const input = "[Invalid](not-a-url)";
+    const result = await addFaviconToMarkdownLink(input);
+
+    expect(result).toBe(input);
+  });
+
+  it("should handle empty title in markdown link", async () => {
+    const input = "[](https://github.com)";
+    const result = await addFaviconToMarkdownLink(input);
+
+    expect(result).toBe(
+      "![github.com-favicon](https://www.google.com/s2/favicons?domain=github.com&sz=16) [](https://github.com)"
+    );
+  });
+
+  it("should handle complex title with special characters", async () => {
+    const input = "[GitHub: Let's build from here](https://github.com)";
+    const result = await addFaviconToMarkdownLink(input);
+
+    expect(result).toBe(
+      "![github.com-favicon](https://www.google.com/s2/favicons?domain=github.com&sz=16) [GitHub: Let's build from here](https://github.com)"
     );
   });
 });

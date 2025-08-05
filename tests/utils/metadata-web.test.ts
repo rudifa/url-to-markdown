@@ -1,5 +1,7 @@
 import {describe, it, expect, beforeEach} from "vitest";
-import {fetchPageTitle} from "../../src/utils/metadata.js";
+import metadataUtils, {fetchPageTitle} from "../../src/utils/metadata.js";
+
+const {fetchPageTitle2} = metadataUtils;
 
 // Real web tests - these may be unstable due to network conditions
 // To run these tests, set environment variable: RUN_WEB_TESTS=true
@@ -25,6 +27,30 @@ describe("fetchPageTitle from the web", () => {
     {
       url: "https://logseq.com",
       titlePattern: /A privacy-first, open-source knowledge base/,
+    },
+    {
+      url: "https://developer.mozilla.org",
+      titlePattern: /MDN Web Docs/,
+    },
+    {
+      url: "https://nodejs.org",
+      titlePattern: /Node.js — Run JavaScript Everywhere/,
+    },
+    {
+      url: "https://www.npmjs.com",
+      titlePattern: /npm | Home/,
+    },
+    {
+      url: "https://www.google.com",
+      titlePattern: /Google/,
+    },
+    {
+      url: "https://chatgpt.com/share/6891af68-d7fc-8010-a6b2-a4b7edad160b",
+      titlePattern: /ChatGPT - Split commit into files/,
+    },
+    {
+      url: "https://www.perplexity.ai/search/a-browser-question-in-the-atta-fqTG2DhRQRmjFVHXNXwG.Q-first, open-source knowledge base/",
+      titlePattern: /Just a moment.../,
     },
   ];
 
@@ -55,7 +81,7 @@ describe("fetchPageTitle from the web", () => {
           result = await fetchPageTitle(url);
 
           if (isVerbose) {
-            console.log(`✅ Result for ${url}:`, result);
+            console.log(`✅ fetchPageTitle for ${url}:`, result);
           }
         } catch (error) {
           if (isVerbose) {
@@ -76,7 +102,7 @@ describe("fetchPageTitle from the web", () => {
 
         if (gotActualMetadata && titlePattern) {
           expect(result.title).toMatch(titlePattern);
-          console.log(`✅ Got metadata for ${url}: "${result.title}"`);
+          console.log(`✅ Got metadata title for ${url}: "${result.title}"`);
         } else {
           expect(result.title).toBe(url);
           console.log(`⚠️ Got fallback for ${url} (API may be rate-limited)`);
@@ -89,6 +115,46 @@ describe("fetchPageTitle from the web", () => {
         }
       },
       webTestTimeout
+    );
+
+    // Comparison test for fetchPageTitle2
+    it(
+      `should compare fetchPageTitle vs fetchPageTitle2 for ${url}`,
+      async () => {
+        if (isVerbose) {
+          console.log(`\n🔍 Comparing functions for URL: ${url}`);
+        }
+
+        const [result1, result2] = await Promise.all([
+          fetchPageTitle(url).catch((err) => ({
+            title: url,
+            error: err.message,
+          })),
+          fetchPageTitle2(url).catch((err) => ({
+            title: url,
+            error: err.message,
+          })),
+        ]);
+
+        if (isVerbose) {
+          console.log(`📊 fetchPageTitle result:`, result1);
+          console.log(`📊 fetchPageTitle2 result:`, result2);
+          console.log(
+            `🔗 Title comparison: "${result1.title}" vs "${result2.title}"`
+          );
+        }
+
+        // Both should return valid results
+        expect(result1).toHaveProperty("title");
+        expect(result2).toHaveProperty("title");
+
+        // Log comparison for analysis
+        console.log(`🏷️ ${url}:`);
+        console.log(`   fetchPageTitle: "${result1.title}"`);
+        console.log(`   fetchPageTitle2: "${result2.title}"`);
+        console.log(`   Same title: ${result1.title === result2.title}`);
+      },
+      webTestTimeout * 2 // Allow more time for both calls
     );
   });
 

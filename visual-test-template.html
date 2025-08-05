@@ -223,6 +223,48 @@
         animation: spin 1s linear infinite;
         margin-right: 8px;
       }
+
+      /* Favicon test specific styles */
+      .favicon-results {
+        margin: 20px 0;
+      }
+      .url-input-section {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+      .markdown-item {
+        margin: 15px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 6px;
+        border-left: 4px solid #4caf50;
+      }
+      .markdown-preview {
+        font-family: "Monaco", "Consolas", monospace;
+        font-size: 0.9em;
+      }
+      .markdown-source {
+        margin-bottom: 10px;
+        padding: 8px;
+        background: #f5f5f5;
+        border-radius: 4px;
+      }
+      .markdown-rendered {
+        padding: 8px;
+        background: #e8f5e8;
+        border-radius: 4px;
+      }
+      .error-message {
+        color: #f44336;
+        font-weight: bold;
+      }
+      .copy-section {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 6px;
+      }
     </style>
   </head>
   <body>
@@ -257,6 +299,9 @@
         <button class="btn" onclick="runMetadataTest()" id="metadataBtn">
           🌐 Test Metadata Fetching
         </button>
+        <button class="btn" onclick="runFaviconMarkdownTest()" id="faviconBtn">
+          🎨 Generate Favicon Markdown
+        </button>
         <button class="btn" onclick="runAllTests()">🚀 Run All Tests</button>
       </div>
 
@@ -271,6 +316,13 @@
         <h3>🌐 Metadata Fetching Results</h3>
         <div id="metadataResults">
           <p>Click "Test Metadata Fetching" to see results...</p>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h3>🎨 Favicon Markdown Generation</h3>
+        <div id="faviconResults">
+          <p>Click "Generate Favicon Markdown" to see results...</p>
         </div>
       </div>
     </div>

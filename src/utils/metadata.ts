@@ -106,12 +106,45 @@ export function isValidURL(str: string): boolean {
 }
 
 /**
+ * Fetches favicon markdown for a URL
+ * @param url - The URL to get favicon for
+ * @param options - Favicon options
+ * @returns Promise with favicon markdown string
+ */
+export async function fetchFaviconMarkdown(
+  url: string,
+  options: {
+    size?: number;
+    altTextTemplate?: (hostname: string) => string;
+  } = {}
+): Promise<string> {
+  const {size = 16, altTextTemplate = (hostname) => `${hostname}-favicon`} =
+    options;
+
+  try {
+    const {hostname} = new URL(url);
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=${size}`;
+    const altText = altTextTemplate(hostname);
+    return `![${altText}](${faviconUrl})`;
+  } catch (error) {
+    console.warn("Invalid URL for favicon:", url);
+    return "";
+  }
+}
+
+/**
  * Processes a URL to create markdown with title
  * @param url - The URL to process
+ * @param options - Options for markdown generation
  * @returns Promise with markdown string or null if invalid URL
  */
 export async function processURLToMarkdown(
-  url: string
+  url: string,
+  options: {
+    includeFavicon?: boolean;
+    faviconSize?: number;
+    faviconPosition?: "before" | "after";
+  } = {}
 ): Promise<string | null> {
   console.log(`🔗 Processing URL: ${url}`);
 
@@ -120,24 +153,77 @@ export async function processURLToMarkdown(
     return null;
   }
 
-  // Fetch page title and create markdown
-  console.log(`🌐 Fetching title for: ${url}`);
-  const {title} = await fetchPageTitle(url);
+  // Launch both fetches in parallel when favicon is enabled
+  if (options.includeFavicon) {
+    console.log(`🌐 Fetching title and favicon for: ${url}`);
 
-  // Create markdown - just use the title for clean formatting
-  const markdown = `[${title}](${url})`;
-  console.log(`✨ Generated markdown: ${markdown}`);
+    try {
+      const [titleResult, faviconMarkdown] = await Promise.allSettled([
+        fetchPageTitle(url),
+        fetchFaviconMarkdown(url, {size: options.faviconSize}),
+      ]);
 
-  return markdown;
+      // Handle title result
+      let title = url; // fallback
+      if (titleResult.status === "fulfilled") {
+        title = titleResult.value.title;
+      } else {
+        console.warn(
+          `⚠️ Failed to fetch title for ${url}:`,
+          titleResult.reason
+        );
+      }
+
+      // Create basic markdown
+      let markdown = `[${title}](${url})`;
+      console.log(`✨ Generated basic markdown: ${markdown}`);
+
+      // Handle favicon result
+      if (faviconMarkdown.status === "fulfilled" && faviconMarkdown.value) {
+        const position = options.faviconPosition || "before";
+        markdown =
+          position === "before"
+            ? `${faviconMarkdown.value}  ${markdown}`
+            : `${markdown}  ${faviconMarkdown.value}`;
+        console.log(`🎨 Enhanced with favicon: ${markdown}`);
+      } else if (faviconMarkdown.status === "rejected") {
+        console.warn(
+          `⚠️ Failed to fetch favicon for ${url}:`,
+          faviconMarkdown.reason
+        );
+      }
+
+      return markdown;
+    } catch (error) {
+      console.error(`💥 Unexpected error processing ${url}:`, error);
+      // Fallback to basic processing
+      const {title} = await fetchPageTitle(url);
+      return `[${title}](${url})`;
+    }
+  } else {
+    // Favicon not enabled - just fetch title
+    console.log(`🌐 Fetching title for: ${url}`);
+    const {title} = await fetchPageTitle(url);
+
+    const markdown = `[${title}](${url})`;
+    console.log(`✨ Generated basic markdown: ${markdown}`);
+    return markdown;
+  }
 }
 
 /**
  * Processes block content to convert all raw URLs to markdown
  * @param content - The original block content
+ * @param options - Options for markdown generation
  * @returns Promise with updated content or original content if no processing needed
  */
 export async function processBlockContentForURLs(
-  content: string
+  content: string,
+  options: {
+    includeFavicon?: boolean;
+    faviconSize?: number;
+    faviconPosition?: "before" | "after";
+  } = {}
 ): Promise<string> {
   // Analyze URLs in the content using urlFind
   const urlAnalysis = analyzeBlockURLs(content);
@@ -158,7 +244,7 @@ export async function processBlockContentForURLs(
     const {url} = rawURL;
 
     // Process URL to markdown
-    const markdown = await processURLToMarkdown(url);
+    const markdown = await processURLToMarkdown(url, options);
     if (markdown) {
       // Replace the URL with markdown using precise coordinates
       updatedContent =
@@ -179,10 +265,114 @@ export async function processBlockContentForURLs(
   return updatedContent;
 }
 
+// Compare fetchPageTitle function to the one in urlFind.ts
+
+async function fetchPageTitle2(url: string): Promise<URLMetadata> {
+  console.log("📥 fetchPageTitle2 called with url:", url);
+  try {
+    const htmlTitleTag = /<title(\s[^>]+)*>([^<]*)<\/title>/;
+
+    const response = await fetch(url);
+    const responseText = await response.text();
+    const matches = responseText.match(htmlTitleTag);
+    if (matches !== null && matches.length > 1 && matches[2] !== null) {
+      const title = decodeHTML(matches[2].trim());
+      console.log("📥 Title found:", title);
+      return {
+        title,
+        hasIcon: false, // fetchPageTitle2 doesn't handle icons
+        note: "Fetched with fetchPageTitle2 (regex parsing)",
+      };
+    } else {
+      console.log("📥 No <title> tag found in response");
+      return {
+        title: url,
+        hasIcon: false,
+        note: "No title found - using URL as fallback",
+      };
+    }
+  } catch (e) {
+    console.error("📥 Error fetching title:", e);
+    return {
+      title: url,
+      hasIcon: false,
+      note: `Error fetching title: ${
+        e instanceof Error ? e.message : String(e)
+      }`,
+    };
+  }
+}
+
+function decodeHTML(input: string): string {
+  if (!input) {
+    return "";
+  }
+
+  // Check if we're in a browser environment
+  if (typeof window !== "undefined" && window.DOMParser) {
+    const doc = new DOMParser().parseFromString(input, "text/html");
+    return doc.documentElement.textContent || "";
+  }
+
+  // Node.js fallback: basic HTML entity decoding
+  return input
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#(\d+);/g, (_match: string, dec: string) =>
+      String.fromCharCode(parseInt(dec, 10))
+    )
+    .replace(/&#x([0-9a-f]+);/gi, (_match: string, hex: string) =>
+      String.fromCharCode(parseInt(hex, 16))
+    );
+}
+
+export async function addFaviconToMarkdownLink(
+  markdownLink: string,
+  options: {
+    size?: number;
+    position?: "before" | "after";
+    altTextTemplate?: (hostname: string) => string;
+  } = {}
+): Promise<string> {
+  const {
+    size = 16,
+    position = "before",
+    altTextTemplate = (hostname) => `${hostname}-favicon`,
+  } = options;
+
+  const markdownRegex = /\[([^\]]*)\]\(([^)]+)\)/;
+  const match = markdownLink.match(markdownRegex);
+
+  if (!match) return markdownLink;
+
+  const [fullMatch, title, url] = match;
+
+  try {
+    const {hostname} = new URL(url);
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=${size}`;
+    const altText = altTextTemplate(hostname);
+    const faviconMarkdown = `![${altText}](${faviconUrl})`;
+
+    return position === "before"
+      ? `${faviconMarkdown} ${markdownLink}`
+      : `${markdownLink} ${faviconMarkdown}`;
+  } catch (error) {
+    console.warn("Invalid URL in markdown link:", url);
+    return markdownLink;
+  }
+}
+
 // Default export for easy importing
 export default {
   fetchPageTitle,
   isValidURL,
   processURLToMarkdown,
   processBlockContentForURLs,
+  fetchPageTitle2, // Added for comparison
+  addFaviconToMarkdownLink, // Added for favicon functionality
+  fetchFaviconMarkdown, // Added for cleaner favicon handling
 };
