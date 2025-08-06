@@ -2,15 +2,10 @@
 // This file imports the actual production code and sets up the visual test interface
 
 import {findFormattedURLs, findRawURLs} from "./utils/urlFind";
-import {fetchPageTitle, addFaviconToMarkdownLink} from "./utils/metadata";
+import {fetchPageTitle, fetchFaviconMarkdown} from "./utils/metadata";
 
 // Re-export utilities for testing
-export {
-  findFormattedURLs,
-  findRawURLs,
-  fetchPageTitle,
-  addFaviconToMarkdownLink,
-};
+export {findFormattedURLs, findRawURLs, fetchPageTitle, fetchFaviconMarkdown};
 
 // Helper function for combined URL analysis
 export function analyzeBlockURLs(content: string) {
@@ -252,7 +247,10 @@ async function runFaviconMarkdownTest() {
       const basicMarkdown = `[${title}](${url})`;
 
       // Add favicon to markdown
-      const faviconMarkdown = await addFaviconToMarkdownLink(basicMarkdown);
+      const faviconImg = await fetchFaviconMarkdown(url);
+      const faviconMarkdown = faviconImg
+        ? `${faviconImg} ${basicMarkdown}`
+        : basicMarkdown;
 
       // Display result
       itemElement.innerHTML = `
@@ -327,7 +325,10 @@ async function addCustomUrl() {
     const title =
       metadata.title !== url ? metadata.title : new URL(url).hostname;
     const basicMarkdown = `[${title}](${url})`;
-    const faviconMarkdown = await addFaviconToMarkdownLink(basicMarkdown);
+    const faviconImg = await fetchFaviconMarkdown(url);
+    const faviconMarkdown = faviconImg
+      ? `${faviconImg} ${basicMarkdown}`
+      : basicMarkdown;
 
     // Update display
     loadingItem.innerHTML = `
@@ -384,10 +385,17 @@ async function copyAllResults() {
       button.innerHTML = originalText;
     }, 2000);
   } catch (err) {
-    // Fallback for older browsers
-    textarea.select();
-    document.execCommand("copy");
-    console.log("Fallback copy method used");
+    // Fallback for older browsers - handle the exception properly
+    console.warn("Failed to copy to clipboard:", err);
+    try {
+      textarea.select();
+      // Using deprecated method as fallback, suppress warning
+      // eslint-disable-next-line deprecation/deprecation
+      document.execCommand("copy");
+      console.log("Fallback copy method used");
+    } catch (fallbackErr) {
+      console.error("All copy methods failed:", fallbackErr);
+    }
   }
 }
 
@@ -406,7 +414,7 @@ declare global {
     findRawURLs: typeof findRawURLs;
     analyzeBlockURLs: typeof analyzeBlockURLs;
     fetchPageTitle: typeof fetchPageTitle;
-    addFaviconToMarkdownLink: typeof addFaviconToMarkdownLink;
+    fetchFaviconMarkdown: typeof fetchFaviconMarkdown;
     runURLDetectionTest: typeof runURLDetectionTest;
     runMetadataTest: typeof runMetadataTest;
     runFaviconMarkdownTest: typeof runFaviconMarkdownTest;
@@ -421,7 +429,7 @@ window.findFormattedURLs = findFormattedURLs;
 window.findRawURLs = findRawURLs;
 window.analyzeBlockURLs = analyzeBlockURLs;
 window.fetchPageTitle = fetchPageTitle;
-window.addFaviconToMarkdownLink = addFaviconToMarkdownLink;
+window.fetchFaviconMarkdown = fetchFaviconMarkdown;
 window.runURLDetectionTest = runURLDetectionTest;
 window.runMetadataTest = runMetadataTest;
 window.runFaviconMarkdownTest = runFaviconMarkdownTest;

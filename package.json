@@ -4,7 +4,7 @@
     "main": "dist/index.html",
     "type": "module",
     "scripts": {
-        "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser && cp index.html dist/plugin.html",
+        "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser && cp index.html dist/plugin.html && cp index.html dist/index.html",
         "dev": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser --watch && cp index.html dist/plugin.html",
         "build:visual-test": "esbuild src/visual-test-entry.ts --bundle --outfile=dist/visual-test.js --format=iife --platform=browser && cp visual-test-template.html dist/visual-test.html && cp assets/favicon.svg dist/favicon.svg",
         "dev:visual-test": "esbuild src/visual-test-entry.ts --bundle --outfile=dist/visual-test.js --format=iife --platform=browser --watch",

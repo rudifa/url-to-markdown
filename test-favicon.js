@@ -1,10 +1,32 @@
 #!/usr/bin/env node
 
-// Simple test script for the addFaviconToMarkdownLink function
-import { addFaviconToMarkdownLink } from './src/utils/metadata.js';
+// Simple test script for favicon functionality using fetchFaviconMarkdown
+import { fetchFaviconMarkdown } from './src/utils/metadata.js';
+
+// Helper function to simulate addFaviconToMarkdownLink behavior
+async function addFaviconToMarkdownLink(markdownLink, options = {}) {
+  const { size = 16, position = "before" } = options;
+
+  const markdownRegex = /\[([^\]]*)\]\(([^)]+)\)/;
+  const match = markdownLink.match(markdownRegex);
+
+  if (!match) return markdownLink;
+
+  const [, , url] = match;
+
+  try {
+    const faviconMarkdown = await fetchFaviconMarkdown(url, { size });
+    return position === "before"
+      ? `${faviconMarkdown} ${markdownLink}`
+      : `${markdownLink} ${faviconMarkdown}`;
+  } catch (error) {
+    console.warn("Invalid URL in markdown link:", url, error);
+    return markdownLink;
+  }
+}
 
 async function testFaviconFunction() {
-  console.log('🧪 Testing addFaviconToMarkdownLink function\n');
+  console.log('🧪 Testing favicon functionality with fetchFaviconMarkdown\n');
 
   const testCases = [
     {

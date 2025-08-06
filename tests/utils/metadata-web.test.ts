@@ -1,7 +1,5 @@
 import {describe, it, expect, beforeEach} from "vitest";
-import metadataUtils, {fetchPageTitle} from "../../src/utils/metadata.js";
-
-const {fetchPageTitle2} = metadataUtils;
+import {fetchPageTitle} from "../../src/utils/metadata.js";
 
 // Real web tests - these may be unstable due to network conditions
 // To run these tests, set environment variable: RUN_WEB_TESTS=true
@@ -116,46 +114,6 @@ describe("fetchPageTitle from the web", () => {
       },
       webTestTimeout
     );
-
-    // Comparison test for fetchPageTitle2
-    it(
-      `should compare fetchPageTitle vs fetchPageTitle2 for ${url}`,
-      async () => {
-        if (isVerbose) {
-          console.log(`\n🔍 Comparing functions for URL: ${url}`);
-        }
-
-        const [result1, result2] = await Promise.all([
-          fetchPageTitle(url).catch((err) => ({
-            title: url,
-            error: err.message,
-          })),
-          fetchPageTitle2(url).catch((err) => ({
-            title: url,
-            error: err.message,
-          })),
-        ]);
-
-        if (isVerbose) {
-          console.log(`📊 fetchPageTitle result:`, result1);
-          console.log(`📊 fetchPageTitle2 result:`, result2);
-          console.log(
-            `🔗 Title comparison: "${result1.title}" vs "${result2.title}"`
-          );
-        }
-
-        // Both should return valid results
-        expect(result1).toHaveProperty("title");
-        expect(result2).toHaveProperty("title");
-
-        // Log comparison for analysis
-        console.log(`🏷️ ${url}:`);
-        console.log(`   fetchPageTitle: "${result1.title}"`);
-        console.log(`   fetchPageTitle2: "${result2.title}"`);
-        console.log(`   Same title: ${result1.title === result2.title}`);
-      },
-      webTestTimeout * 2 // Allow more time for both calls
-    );
   });
 
   it("should handle non-existent domains gracefully", async () => {
@@ -163,14 +121,14 @@ describe("fetchPageTitle from the web", () => {
       "https://this-domain-definitely-does-not-exist-12345.com";
     const result = await fetchPageTitle(invalidUrl);
 
-    // Should fallback to some form of the URL when fetch fails
-    // The API might return the URL with or without the protocol
+    // The real microlink.io API returns the domain name as title for non-existent domains
+    // This is different from mock test behavior where we simulate actual failures
     expect(result).toHaveProperty("title");
     expect(result).toHaveProperty("hasIcon", false);
-    expect(
-      result.title === invalidUrl ||
-        result.title === "this-domain-definitely-does-not-exist-12345.com"
-    ).toBe(true);
+    // For non-existent domains, the API typically returns the domain name as title
+    expect(result.title).toBe(
+      "this-domain-definitely-does-not-exist-12345.com"
+    );
   }, 5000);
 
   it("should handle slow responses within timeout", async () => {

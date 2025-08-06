@@ -1,29 +1,9 @@
 import "@logseq/libs";
-import {processBlockContentForURLs} from "./utils/metadata";
-
-// Plugin settings interface
-interface PluginSettings {
-  enableFavicons: boolean;
-  faviconSize: number;
-  faviconPosition: "before" | "after";
-}
-
-// Default settings
-const defaultSettings: PluginSettings = {
-  enableFavicons: true,
-  faviconSize: 16,
-  faviconPosition: "before",
-};
-
-// Use an async IIFE to run the main function after Logseq is ready.
-(async () => {
-  await logseq.ready();
-  main().catch(console.error);
-})();
+import {processBlockContentForURLs, PluginSettings} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 3.5.6 with favicon support");
+  console.log("main url-to-markdown 3.9.1");
 
   // Register plugin settings
   logseq.useSettingsSchema([
@@ -32,21 +12,21 @@ async function main() {
       type: "boolean",
       title: "Enable Favicons",
       description: "Add favicons to markdown links",
-      default: defaultSettings.enableFavicons,
+      default: true,
     },
     {
       key: "faviconSize",
       type: "number",
       title: "Favicon Size",
       description: "Size of favicons in pixels",
-      default: defaultSettings.faviconSize,
+      default: 16,
     },
     {
       key: "faviconPosition",
       type: "enum",
       title: "Favicon Position",
       description: "Position of favicon relative to link text",
-      default: defaultSettings.faviconPosition,
+      default: "before",
       enumChoices: ["before", "after"],
       enumPicker: "radio",
     },
@@ -79,15 +59,8 @@ async function processBlockForURLs(blockUuid: string) {
 
     const content = block.content;
 
-    // Get plugin settings
-    const settings = logseq.settings as unknown as PluginSettings;
-    const faviconOptions = {
-      includeFavicon:
-        settings?.enableFavicons ?? defaultSettings.enableFavicons,
-      faviconSize: settings?.faviconSize ?? defaultSettings.faviconSize,
-      faviconPosition:
-        settings?.faviconPosition ?? defaultSettings.faviconPosition,
-    };
+    // Get favicon options with default fallbacks
+    const faviconOptions = getFaviconOptions();
 
     // Process block content for URLs
     const updatedContent = await processBlockContentForURLs(
@@ -108,16 +81,15 @@ async function processBlockForURLs(blockUuid: string) {
   }
 }
 
-function attachToCurrentEditor() {
-  // This function is no longer needed with the new approach
-  console.log("attachToCurrentEditor - not needed with block-based approach");
-}
-
-function debounce(fn: (...args: any[]) => void, delay = 300) {
-  // Debounce function kept for potential future use
-  let timer: number | undefined;
-  return (...args: any[]) => {
-    if (timer) clearTimeout(timer);
-    timer = window.setTimeout(() => fn(...args), delay);
+// Helper function to get favicon options with fallbacks to default settings
+function getFaviconOptions() {
+  const settings = logseq.settings as unknown as PluginSettings;
+  return {
+    includeFavicon: settings?.enableFavicons ?? true,
+    faviconSize: settings?.faviconSize ?? 16,
+    faviconPosition: settings?.faviconPosition ?? "before",
   };
 }
+
+// Initialize the plugin
+logseq.ready(main).catch(console.error);
