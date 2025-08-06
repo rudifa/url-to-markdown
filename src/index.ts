@@ -45,6 +45,17 @@ async function main() {
       }
     }
   });
+
+  logseq.App.onRouteChanged(async (e) => {
+    console.log("Route changed:", e);
+
+    // Extract page name from the route parameters
+    const pageName = e.parameters?.path?.name;
+    if (pageName && e.template === "/page/:name") {
+      console.log(`📄 Processing page: ${pageName}`);
+      await processPageBlocks(pageName);
+    }
+  });
 }
 
 async function processBlockForURLs(blockUuid: string) {
@@ -78,6 +89,48 @@ async function processBlockForURLs(blockUuid: string) {
     }
   } catch (error) {
     console.error(`❌ Error processing block ${blockUuid}:`, error);
+  }
+}
+
+async function processPageBlocks(pageName: string) {
+  try {
+    console.log(`🔍 Getting blocks for page: ${pageName}`);
+
+    // Get the page entity
+    const page = await logseq.Editor.getPage(pageName);
+    if (!page) {
+      console.log(`❌ Page not found: ${pageName}`);
+      return;
+    }
+
+    // Get all blocks from the page
+    const pageBlocks = await logseq.Editor.getPageBlocksTree(pageName);
+    if (!pageBlocks || pageBlocks.length === 0) {
+      console.log(`📄 No blocks found on page: ${pageName}`);
+      return;
+    }
+
+    console.log(
+      `📄 Found ${pageBlocks.length} top-level blocks on page: ${pageName}`
+    );
+
+    // Process each block (including nested blocks)
+    await processBlocksRecursively(pageBlocks);
+  } catch (error) {
+    console.error(`❌ Error processing page blocks for ${pageName}:`, error);
+  }
+}
+
+async function processBlocksRecursively(blocks: any[]) {
+  for (const block of blocks) {
+    if (block?.uuid) {
+      await processBlockForURLs(block.uuid);
+    }
+
+    // Process child blocks if they exist
+    if (block.children && block.children.length > 0) {
+      await processBlocksRecursively(block.children);
+    }
   }
 }
 
