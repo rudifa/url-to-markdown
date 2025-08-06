@@ -54,7 +54,9 @@ async function main() {
 
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {
-    console.log("📥 DB.onChanged event:", e);
+    console.log(
+      `📥 DB.onChanged event: ${e}, e.txMeta.outlinerOp: ${e.txMeta.outlinerOp}`
+    );
     if (e.blocks && Array.isArray(e.blocks)) {
       for (const block of e.blocks) {
         if (block?.uuid) {

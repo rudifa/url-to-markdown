@@ -4,7 +4,7 @@
 import {analyzeBlockURLs} from "./urlFind";
 
 export interface URLMetadata {
-  title: string;
+  title: string | null;
   icon?: string;
   hasIcon?: boolean;
   note?: string;
@@ -44,13 +44,11 @@ export async function fetchPageTitle(url: string): Promise<URLMetadata> {
     const data = await response.json();
 
     if (isVerbose) {
-      //   console.log(`📦 Raw API response:`, JSON.stringify(data, null, 2));
-      // } else {
       console.log(`🔗 Fetched metadata for ${url}:`, data);
     }
 
     if (data?.status === "success" && data?.data) {
-      const title = data.data.title || url; // Fallback to URL if title is null/empty
+      const title = data.data.title || null; // Return null if title is empty/undefined
       const hasIcon = !!(data.data.logo || data.data.image?.url);
       const result = {title, hasIcon};
 
@@ -74,11 +72,11 @@ export async function fetchPageTitle(url: string): Promise<URLMetadata> {
     if (isVerbose) {
       console.log(`💥 API error for ${url}:`, error);
     }
-    // Fallback to URL when API fails (intentionally broad catch)
+    // Fallback when API fails (intentionally broad catch)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _error = error; // Acknowledge we're catching all errors
     const fallbackResult = {
-      title: url,
+      title: null, // No title available when API fails
       hasIcon: false,
       note: "API may be rate-limited or unavailable",
     };
@@ -164,7 +162,7 @@ export async function processURLToMarkdown(
       ]);
 
       // Handle title result
-      let title = url; // fallback
+      let title = null; // fallback
       if (titleResult.status === "fulfilled") {
         title = titleResult.value.title;
       } else {
@@ -172,6 +170,12 @@ export async function processURLToMarkdown(
           `⚠️ Failed to fetch title for ${url}:`,
           titleResult.reason
         );
+        return null;
+      }
+
+      if (!title) {
+        console.log(`⚠️ No title found for ${url}`);
+        return null;
       }
 
       // Create basic markdown
@@ -196,14 +200,17 @@ export async function processURLToMarkdown(
       return markdown;
     } catch (error) {
       console.error(`💥 Unexpected error processing ${url}:`, error);
-      // Fallback to basic processing
-      const {title} = await fetchPageTitle(url);
-      return `[${title}](${url})`;
+      return null; // Don't attempt fallback processing
     }
   } else {
     // Favicon not enabled - just fetch title
     console.log(`🌐 Fetching title for: ${url}`);
     const {title} = await fetchPageTitle(url);
+
+    if (!title) {
+      console.log(`⚠️ Failed to fetch title for ${url}`);
+      return null;
+    }
 
     const markdown = `[${title}](${url})`;
     console.log(`✨ Generated basic markdown: ${markdown}`);
@@ -265,71 +272,6 @@ export async function processBlockContentForURLs(
   return updatedContent;
 }
 
-// Compare fetchPageTitle function to the one in urlFind.ts
-
-async function fetchPageTitle2(url: string): Promise<URLMetadata> {
-  console.log("📥 fetchPageTitle2 called with url:", url);
-  try {
-    const htmlTitleTag = /<title(\s[^>]+)*>([^<]*)<\/title>/;
-
-    const response = await fetch(url);
-    const responseText = await response.text();
-    const matches = responseText.match(htmlTitleTag);
-    if (matches !== null && matches.length > 1 && matches[2] !== null) {
-      const title = decodeHTML(matches[2].trim());
-      console.log("📥 Title found:", title);
-      return {
-        title,
-        hasIcon: false, // fetchPageTitle2 doesn't handle icons
-        note: "Fetched with fetchPageTitle2 (regex parsing)",
-      };
-    } else {
-      console.log("📥 No <title> tag found in response");
-      return {
-        title: url,
-        hasIcon: false,
-        note: "No title found - using URL as fallback",
-      };
-    }
-  } catch (e) {
-    console.error("📥 Error fetching title:", e);
-    return {
-      title: url,
-      hasIcon: false,
-      note: `Error fetching title: ${
-        e instanceof Error ? e.message : String(e)
-      }`,
-    };
-  }
-}
-
-function decodeHTML(input: string): string {
-  if (!input) {
-    return "";
-  }
-
-  // Check if we're in a browser environment
-  if (typeof window !== "undefined" && window.DOMParser) {
-    const doc = new DOMParser().parseFromString(input, "text/html");
-    return doc.documentElement.textContent || "";
-  }
-
-  // Node.js fallback: basic HTML entity decoding
-  return input
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#(\d+);/g, (_match: string, dec: string) =>
-      String.fromCharCode(parseInt(dec, 10))
-    )
-    .replace(/&#x([0-9a-f]+);/gi, (_match: string, hex: string) =>
-      String.fromCharCode(parseInt(hex, 16))
-    );
-}
-
 export async function addFaviconToMarkdownLink(
   markdownLink: string,
   options: {
@@ -372,7 +314,6 @@ export default {
   isValidURL,
   processURLToMarkdown,
   processBlockContentForURLs,
-  fetchPageTitle2, // Added for comparison
-  addFaviconToMarkdownLink, // Added for favicon functionality
-  fetchFaviconMarkdown, // Added for cleaner favicon handling
+  addFaviconToMarkdownLink,
+  fetchFaviconMarkdown,
 };
