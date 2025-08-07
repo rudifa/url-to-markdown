@@ -1,7 +1,6 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from "vitest";
 import {
   fetchPageTitle,
-  URLMetadata,
   processBlockContentForURLs,
 } from "../../src/utils/metadata.js";
 
@@ -56,10 +55,7 @@ describe("fetchPageTitle", () => {
 
       const result = await fetchPageTitle("https://example.com");
 
-      expect(result).toEqual({
-        title: "Example Website",
-        hasIcon: true,
-      });
+      expect(result).toBe("Example Website");
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://api.microlink.io/?url=https%3A%2F%2Fexample.com"
@@ -76,10 +72,7 @@ describe("fetchPageTitle", () => {
 
       const result = await fetchPageTitle("https://example.com");
 
-      expect(result).toEqual({
-        title: "Example Website",
-        hasIcon: true,
-      });
+      expect(result).toBe("Example Website");
     });
 
     it("should handle missing logo and image gracefully", async () => {
@@ -91,10 +84,7 @@ describe("fetchPageTitle", () => {
 
       const result = await fetchPageTitle("https://example.com");
 
-      expect(result).toEqual({
-        title: "Example Website",
-        hasIcon: false,
-      });
+      expect(result).toBe("Example Website");
     });
   });
 
@@ -106,10 +96,7 @@ describe("fetchPageTitle", () => {
 
       const result = await fetchPageTitle("https://example.com");
 
-      expect(result).toEqual({
-        title: null,
-        hasIcon: true,
-      });
+      expect(result).toBeNull();
     });
   });
 
@@ -122,11 +109,7 @@ describe("fetchPageTitle", () => {
 
       const result = await fetchPageTitle("https://example.com");
 
-      expect(result).toEqual({
-        title: null,
-        hasIcon: false,
-        note: "API may be rate-limited or unavailable",
-      });
+      expect(result).toBeNull();
     });
 
     it("should handle fetch errors gracefully", async () => {
@@ -134,11 +117,7 @@ describe("fetchPageTitle", () => {
 
       const result = await fetchPageTitle("https://example.com");
 
-      expect(result).toEqual({
-        title: null,
-        hasIcon: false,
-        note: "API may be rate-limited or unavailable",
-      });
+      expect(result).toBeNull();
     });
 
     it("should handle JSON parse errors gracefully", async () => {
@@ -151,11 +130,7 @@ describe("fetchPageTitle", () => {
 
       const result = await fetchPageTitle("https://example.com");
 
-      expect(result).toEqual({
-        title: null,
-        hasIcon: false,
-        note: "API may be rate-limited or unavailable",
-      });
+      expect(result).toBeNull();
     });
   });
 
@@ -184,7 +159,7 @@ describe("fetchPageTitle", () => {
         "https://api.github.com/repos/user/repo?sort=updated&direction=desc&per_page=50";
       const result = await fetchPageTitle(complexUrl);
 
-      expect(result.title).toBe("GitHub Repository");
+      expect(result).toBe("GitHub Repository");
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining("https://api.microlink.io/?url=")
       );
@@ -198,11 +173,10 @@ describe("fetchPageTitle", () => {
         logo: "https://test.com/logo.png",
       });
 
-      const result: URLMetadata = await fetchPageTitle("https://test.com");
+      const result = await fetchPageTitle("https://test.com");
 
       // TypeScript should enforce these types
-      expect(typeof result.title).toBe("string");
-      expect(typeof result.hasIcon).toBe("boolean");
+      expect(typeof result).toBe("string");
     });
   });
 });
@@ -242,7 +216,7 @@ describe("processBlockContentForURLs", () => {
     const result = await processBlockContentForURLs(content);
 
     expect(result).toBe(
-      "Check out this site: [Example Website Title](https://example.com) for more info"
+      "Check out this site: ![example.com-favicon](https://www.google.com/s2/favicons?domain=example.com&sz=16)  [Example Website Title](https://example.com) for more info"
     );
     expect(mockFetch).toHaveBeenCalledWith(
       "https://api.microlink.io/?url=https%3A%2F%2Fexample.com"
@@ -266,7 +240,7 @@ describe("processBlockContentForURLs", () => {
 
     // Both URLs should be processed (backwards order due to implementation)
     expect(result).toBe(
-      "Sites: [First Site Title](https://first.com) and [Second Site Title](https://second.com) are good"
+      "Sites: ![first.com-favicon](https://www.google.com/s2/favicons?domain=first.com&sz=16)  [First Site Title](https://first.com) and ![second.com-favicon](https://www.google.com/s2/favicons?domain=second.com&sz=16)  [Second Site Title](https://second.com) are good"
     );
     expect(mockFetch).toHaveBeenCalledTimes(2);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -309,7 +283,7 @@ describe("processBlockContentForURLs", () => {
 
     // Should process the URL without the trailing comma
     expect(result).toBe(
-      "I use [Astro - The web framework for content-driven websites](https://astro.build/), built on top of node."
+      "I use ![astro.build-favicon](https://www.google.com/s2/favicons?domain=astro.build&sz=16)  [Astro - The web framework for content-driven websites](https://astro.build/), built on top of node."
     );
     expect(mockFetch).toHaveBeenCalledWith(
       "https://api.microlink.io/?url=https%3A%2F%2Fastro.build%2F"

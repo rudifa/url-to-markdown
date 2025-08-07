@@ -8,6 +8,27 @@ export interface URLLocation {
   title?: string; // For formatted URLs, the link text
 }
 
+// ============================================================================
+// ENTRY POINT - Main analysis function
+// ============================================================================
+
+/**
+ * Comprehensive analysis of all URLs in block content
+ * @param content - The block content to analyze
+ * @returns Object with formatted and raw URL arrays
+ */
+export function analyzeBlockURLs(content: string) {
+  const formatted = findFormattedURLs(content);
+  return {
+    formatted,
+    raw: findRawURLs(content, formatted),
+  };
+}
+
+// ============================================================================
+// URL DETECTION - Functions called by analyzeBlockURLs
+// ============================================================================
+
 /**
  * Finds all already-formatted markdown URLs in block content
  * Detects patterns like [title](url) and ![alt](url)
@@ -41,14 +62,18 @@ export function findFormattedURLs(content: string): URLLocation[] {
  * Finds all raw, unformatted URLs in block content
  * Detects http(s) URLs that are not already part of markdown formatting
  * @param content - The block content to analyze
+ * @param formattedURLs - Optional pre-computed formatted URLs to avoid re-parsing
  * @returns Array of URLLocation objects for raw URLs
  */
-export function findRawURLs(content: string): URLLocation[] {
+export function findRawURLs(
+  content: string,
+  formattedURLs?: URLLocation[]
+): URLLocation[] {
   const results: URLLocation[] = [];
 
-  // First, find all formatted URLs to exclude them
-  const formattedURLs = findFormattedURLs(content);
-  const formattedRanges = formattedURLs.map((url) => ({
+  // Use provided formatted URLs or find them if not provided
+  const formatted = formattedURLs || findFormattedURLs(content);
+  const formattedRanges = formatted.map((url) => ({
     start: url.start,
     end: url.end,
   }));
@@ -76,7 +101,7 @@ export function findRawURLs(content: string): URLLocation[] {
       (range) => start >= range.start && end <= range.end
     );
 
-    if (!isAlreadyFormatted) {
+    if (!isAlreadyFormatted && isValidURL(url)) {
       results.push({
         url,
         start,
@@ -88,21 +113,28 @@ export function findRawURLs(content: string): URLLocation[] {
   return results;
 }
 
+// ============================================================================
+// HELPER FUNCTIONS - Utilities for URL validation and detection
+// ============================================================================
+
 /**
- * Comprehensive analysis of all URLs in block content
- * @param content - The block content to analyze
- * @returns Object with formatted and raw URL arrays
+ * Validates if a string is a valid URL
+ * @param str - The string to validate
+ * @returns boolean indicating if the string is a valid URL
  */
-export function analyzeBlockURLs(content: string) {
-  return {
-    formatted: findFormattedURLs(content),
-    raw: findRawURLs(content),
-  };
+export function isValidURL(str: string): boolean {
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // Default export for easy importing
 export default {
+  analyzeBlockURLs,
   findFormattedURLs,
   findRawURLs,
-  analyzeBlockURLs,
+  isValidURL,
 };

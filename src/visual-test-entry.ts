@@ -2,10 +2,20 @@
 // This file imports the actual production code and sets up the visual test interface
 
 import {findFormattedURLs, findRawURLs} from "./utils/urlFind";
-import {fetchPageTitle, fetchFaviconMarkdown} from "./utils/metadata";
+import {
+  fetchPageTitle,
+  fetchFaviconMarkdown,
+  processBlockContentForURLs,
+} from "./utils/metadata";
 
 // Re-export utilities for testing
-export {findFormattedURLs, findRawURLs, fetchPageTitle, fetchFaviconMarkdown};
+export {
+  findFormattedURLs,
+  findRawURLs,
+  fetchPageTitle,
+  fetchFaviconMarkdown,
+  processBlockContentForURLs,
+};
 
 // Helper function for combined URL analysis
 export function analyzeBlockURLs(content: string) {
@@ -129,27 +139,47 @@ async function runMetadataTest() {
 
     try {
       const startTime = Date.now();
-      const result = await fetchPageTitle(url);
+
+      // Test both title fetching and full processing with favicons
+      const title = await fetchPageTitle(url);
+      const faviconMarkdown = await fetchFaviconMarkdown(url);
+      const fullProcessing = await processBlockContentForURLs(
+        `Check out ${url}`
+      );
+
       const duration = Date.now() - startTime;
 
-      // Handle icon display
-      const iconCell = result.hasIcon
-        ? '<div class="icon-placeholder">✅</div>'
-        : '<div class="icon-placeholder">❌</div>';
+      // Check if favicon was generated and extract the image URL
+      const hasIcon = faviconMarkdown && faviconMarkdown.trim().length > 0;
+      let iconCell;
 
-      const titleCell = result.title || "No title";
-      const noteCell = result.note || "No note";
+      if (hasIcon) {
+        // Extract the image URL from the markdown: ![alt](url)
+        const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/;
+        const imgMatch = imgRegex.exec(faviconMarkdown);
+        if (imgMatch) {
+          const [, altText, imgUrl] = imgMatch;
+          iconCell = `<div class="icon-display"><img src="${imgUrl}" alt="${altText}" style="width: 16px; height: 16px; display: inline-block;" onerror="this.style.display='none'; this.nextSibling.style.display='inline';"><span style="display: none;">❌</span></div>`;
+        } else {
+          iconCell = `<div class="icon-placeholder">✅ (markdown: ${faviconMarkdown})</div>`;
+        }
+      } else {
+        iconCell = '<div class="icon-placeholder">❌</div>';
+      }
+
+      const titleCell = title || "No title";
+      const noteCell = `Full: ${fullProcessing}`;
 
       row.innerHTML = `
         <td class="url-cell"><a href="${url}" target="_blank" class="url-link">${url}</a></td>
         <td>${iconCell}</td>
         <td class="title-cell">${titleCell}</td>
-        <td>${noteCell}</td>
+        <td class="note-cell">${noteCell}</td>
         <td><span class="status-success">✅ Success</span></td>
         <td class="timing">${duration}ms</td>
       `;
 
-      console.log(`✅ ${url}: ${result.title}`);
+      console.log(`✅ ${url}: Title="${title}", Favicon="${faviconMarkdown}"`);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
@@ -240,8 +270,7 @@ async function runFaviconMarkdownTest() {
     try {
       // Fetch metadata for title
       const metadata = await fetchPageTitle(url);
-      const title =
-        metadata.title !== url ? metadata.title : new URL(url).hostname;
+      const title = metadata !== url ? metadata : new URL(url).hostname;
 
       // Create basic markdown link
       const basicMarkdown = `[${title}](${url})`;
@@ -322,8 +351,7 @@ async function addCustomUrl() {
   try {
     // Generate markdown with favicon
     const metadata = await fetchPageTitle(url);
-    const title =
-      metadata.title !== url ? metadata.title : new URL(url).hostname;
+    const title = metadata !== url ? metadata : new URL(url).hostname;
     const basicMarkdown = `[${title}](${url})`;
     const faviconImg = await fetchFaviconMarkdown(url);
     const faviconMarkdown = faviconImg
