@@ -1,5 +1,5 @@
 import "@logseq/libs";
-import {processBlockContentForURLs, PluginSettings} from "./utils/metadata";
+import {processBlockContentForURLs} from "./utils/metadata";
 
 // Main function
 async function main() {
@@ -46,6 +46,7 @@ async function main() {
     }
   });
 
+  // Listen to page changes and process each changed page
   logseq.App.onRouteChanged(async (e) => {
     console.log("Route changed:", e);
 
@@ -53,11 +54,80 @@ async function main() {
     const pageName = e.parameters?.path?.name;
     if (pageName && e.template === "/page/:name") {
       console.log(`📄 Processing page: ${pageName}`);
-      await processPageBlocks(pageName);
+
+      // Get all blocks from the page as a flat list
+      const blocks = await getPageBlocks(pageName);
+
+      // Process each block (same pattern as DB.onChanged)
+      for (const block of blocks) {
+        if (block?.uuid) {
+          await processBlockForURLs(block.uuid);
+        }
+      }
     }
   });
 }
 
+/**
+ * Gets all blocks from a page as a flat list (including nested blocks)
+ * @param pageName - The name of the page to get blocks from
+ * @returns Promise with array of block objects, or empty array if page not found
+ */
+async function getPageBlocks(pageName: string): Promise<any[]> {
+  try {
+    console.log(`🔍 Getting blocks for page: ${pageName}`);
+
+    // Get the page entity
+    const page = await logseq.Editor.getPage(pageName);
+    if (!page) {
+      console.log(`❌ Page not found: ${pageName}`);
+      return [];
+    }
+
+    // Get all blocks from the page
+    const pageBlocks = await logseq.Editor.getPageBlocksTree(pageName);
+    if (!pageBlocks || pageBlocks.length === 0) {
+      console.log(`📄 No blocks found on page: ${pageName}`);
+      return [];
+    }
+
+    console.log(
+      `📄 Found ${pageBlocks.length} top-level blocks on page: ${pageName}`
+    );
+
+    // Flatten the block tree into a flat list
+    const flatBlocks: any[] = [];
+    flattenBlocks(pageBlocks, flatBlocks);
+
+    console.log(`📄 Total blocks (including nested): ${flatBlocks.length}`);
+    return flatBlocks;
+  } catch (error) {
+    console.error(`❌ Error getting page blocks for ${pageName}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Recursively flattens blocks and their children into a flat array
+ * @param blocks - Array of block objects to flatten
+ * @param flatBlocks - Array to accumulate flattened blocks
+ */
+function flattenBlocks(blocks: any[], flatBlocks: any[]): void {
+  for (const block of blocks) {
+    flatBlocks.push(block);
+
+    // Recursively flatten child blocks
+    if (block.children && block.children.length > 0) {
+      flattenBlocks(block.children, flatBlocks);
+    }
+  }
+}
+
+/**
+ * Processes a single block to convert raw URLs to markdown with titles and optional favicons
+ * @param blockUuid - The UUID of the block to process
+ * @returns Promise that resolves when block processing is complete
+ */
 async function processBlockForURLs(blockUuid: string) {
   try {
     console.log(`🔍 Processing block: ${blockUuid}`);
@@ -70,14 +140,8 @@ async function processBlockForURLs(blockUuid: string) {
 
     const content = block.content;
 
-    // Get favicon options with default fallbacks
-    const faviconOptions = getFaviconOptions();
-
     // Process block content for URLs
-    const updatedContent = await processBlockContentForURLs(
-      content,
-      faviconOptions
-    );
+    const updatedContent = await processBlockContentForURLs(content);
 
     // Only update the block if content actually changed
     if (updatedContent !== content) {
@@ -90,58 +154,6 @@ async function processBlockForURLs(blockUuid: string) {
   } catch (error) {
     console.error(`❌ Error processing block ${blockUuid}:`, error);
   }
-}
-
-async function processPageBlocks(pageName: string) {
-  try {
-    console.log(`🔍 Getting blocks for page: ${pageName}`);
-
-    // Get the page entity
-    const page = await logseq.Editor.getPage(pageName);
-    if (!page) {
-      console.log(`❌ Page not found: ${pageName}`);
-      return;
-    }
-
-    // Get all blocks from the page
-    const pageBlocks = await logseq.Editor.getPageBlocksTree(pageName);
-    if (!pageBlocks || pageBlocks.length === 0) {
-      console.log(`📄 No blocks found on page: ${pageName}`);
-      return;
-    }
-
-    console.log(
-      `📄 Found ${pageBlocks.length} top-level blocks on page: ${pageName}`
-    );
-
-    // Process each block (including nested blocks)
-    await processBlocksRecursively(pageBlocks);
-  } catch (error) {
-    console.error(`❌ Error processing page blocks for ${pageName}:`, error);
-  }
-}
-
-async function processBlocksRecursively(blocks: any[]) {
-  for (const block of blocks) {
-    if (block?.uuid) {
-      await processBlockForURLs(block.uuid);
-    }
-
-    // Process child blocks if they exist
-    if (block.children && block.children.length > 0) {
-      await processBlocksRecursively(block.children);
-    }
-  }
-}
-
-// Helper function to get favicon options with fallbacks to default settings
-function getFaviconOptions() {
-  const settings = logseq.settings as unknown as PluginSettings;
-  return {
-    includeFavicon: settings?.enableFavicons ?? true,
-    faviconSize: settings?.faviconSize ?? 16,
-    faviconPosition: settings?.faviconPosition ?? "before",
-  };
 }
 
 // Initialize the plugin
