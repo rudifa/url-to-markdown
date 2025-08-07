@@ -86,31 +86,26 @@ describe("fetchPageTitle from the web", () => {
             console.log(`❌ Test failed for ${url}:`, error);
           }
           // In case of network failure, verify we get a fallback
-          expect(result || {title: url}).toMatchObject({title: url});
+          expect(result || url).toBe(url);
           return;
         }
 
-        // Verify basic structure
-        expect(result).toHaveProperty("title");
-        expect(typeof result.title).toBe("string");
-        expect(result.title.length).toBeGreaterThan(0);
+        // Verify basic structure - result should be a string or null
+        expect(typeof result).toBe("string");
+        expect(result.length).toBeGreaterThan(0);
 
         // Check if we got actual metadata or fallback
-        const gotActualMetadata = result.title !== url;
+        const gotActualMetadata = result !== url;
 
         if (gotActualMetadata && titlePattern) {
-          expect(result.title).toMatch(titlePattern);
-          console.log(`✅ Got metadata title for ${url}: "${result.title}"`);
+          expect(result).toMatch(titlePattern);
+          console.log(`✅ Got metadata title for ${url}: "${result}"`);
         } else {
-          expect(result.title).toBe(url);
+          expect(result).toBe(url);
           console.log(`⚠️ Got fallback for ${url} (API may be rate-limited)`);
         }
 
-        // Verify icon property if present
-        if (result.icon) {
-          expect(typeof result.icon).toBe("string");
-          expect(result.icon).toMatch(/^https?:\/\//);
-        }
+        // No icon property anymore since fetchPageTitle only returns string | null
       },
       webTestTimeout
     );
@@ -123,19 +118,15 @@ describe("fetchPageTitle from the web", () => {
 
     // The real microlink.io API returns the domain name as title for non-existent domains
     // This is different from mock test behavior where we simulate actual failures
-    expect(result).toHaveProperty("title");
-    expect(result).toHaveProperty("hasIcon", false);
+    expect(typeof result).toBe("string");
     // For non-existent domains, the API typically returns the domain name as title
-    expect(result.title).toBe(
-      "this-domain-definitely-does-not-exist-12345.com"
-    );
+    expect(result).toBe("this-domain-definitely-does-not-exist-12345.com");
   }, 5000);
 
   it("should handle slow responses within timeout", async () => {
     const result = await fetchPageTitle("https://httpbin.org/delay/2");
 
     // Should still get some result even if slow
-    expect(result).toHaveProperty("title");
-    expect(typeof result.title).toBe("string");
+    expect(typeof result).toBe("string");
   }, 15000);
 });

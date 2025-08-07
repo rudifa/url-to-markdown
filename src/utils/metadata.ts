@@ -10,6 +10,13 @@ export interface PluginSettings {
   faviconPosition: "before" | "after";
 }
 
+export interface URLMetadata {
+  title: string | null;
+  icon?: string;
+  hasIcon?: boolean;
+  note?: string;
+}
+
 export interface URLProcessingOptions {
   includeFavicon?: boolean;
   faviconSize?: number;
