@@ -1,0 +1,36 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with Logseq dark theme -->
+  <rect width="32" height="32" rx="4" fill="#1F2937" stroke="#374151" stroke-width="0.5"/>
+  
+  <!-- First row: Icon + Title -->
+  <g transform="translate(4, 8)">
+    <!-- Icon (stylized star/site icon) -->
+    <circle cx="3" cy="3" r="2.5" fill="#60A5FA"/>
+    <circle cx="3" cy="3" r="1" fill="#1F2937"/>
+    <circle cx="3" cy="1.5" r="0.4" fill="#60A5FA"/>
+    
+    <!-- Title text (elegant title bar) -->
+    <rect x="8" y="1.5" width="16" height="1.8" fill="#E5E7EB" rx="0.9"/>
+    <rect x="8" y="4" width="12" height="1.2" fill="#9CA3AF" rx="0.6"/>
+  </g>
+  
+  <!-- Second row: Arrow link -->
+  <g transform="translate(4, 20)">
+    <!-- Elegant curved arrow -->
+    <path d="M2 4 L18 4" 
+          stroke="#10B981" 
+          stroke-width="2" 
+          stroke-linecap="round"/>
+    <!-- Arrow head -->
+    <path d="M16 2 L20 4 L16 6" 
+          fill="none" 
+          stroke="#10B981" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    <!-- Small link indicator dots -->
+    <circle cx="2" cy="4" r="0.8" fill="#10B981"/>
+    <circle cx="6" cy="4" r="0.5" fill="#10B981" opacity="0.6"/>
+    <circle cx="9" cy="4" r="0.5" fill="#10B981" opacity="0.4"/>
+  </g>
+</svg>
