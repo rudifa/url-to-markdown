@@ -4,8 +4,58 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>URL to Markdown Plugin</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+        line-height: 1.6;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .visual-test-link {
+        display: inline-block;
+        background: #4caf50;
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        margin: 20px 0;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      .visual-test-link:hover {
+        background: #45a049;
+      }
+    </style>
   </head>
   <body>
+    <div class="container">
+      <h1>URL to Markdown Plugin</h1>
+      <p>
+        A LogSeq plugin for converting URLs to markdown with titles and
+        favicons.
+      </p>
+
+      <a href="visual-test.html" class="visual-test-link">
+        🧪 Open Visual Test Runner
+      </a>
+
+      <p>
+        <small
+          >The visual test runner allows you to test URL detection, metadata
+          fetching, and favicon generation.</small
+        >
+      </p>
+    </div>
+
     <div id="app"></div>
     <script type="module" src="index.js"></script>
   </body>

@@ -1,4 +1,4 @@
-# samples intended for pasting into a logseq page
+### samples intended for pasting into a logseq page
 
 My home on the www: https://github.com
 
@@ -9,3 +9,9 @@ My preferred note taking application: https://logseq.com
 My favourite framework for building web applications: https://astro.build/, built on top of https://nodejs.org/fr environment.
 
 I use https://astro.build/, built on top of node.
+
+My repos
+
+https://github.com/rudifa/genealogy-astro
+
+https://github.com/rudifa/url-to-markdown

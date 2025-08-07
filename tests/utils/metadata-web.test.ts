@@ -26,6 +26,30 @@ describe("fetchPageTitle from the web", () => {
       url: "https://logseq.com",
       titlePattern: /A privacy-first, open-source knowledge base/,
     },
+    {
+      url: "https://developer.mozilla.org",
+      titlePattern: /MDN Web Docs/,
+    },
+    {
+      url: "https://nodejs.org",
+      titlePattern: /Node.js — Run JavaScript Everywhere/,
+    },
+    {
+      url: "https://www.npmjs.com",
+      titlePattern: /npm | Home/,
+    },
+    {
+      url: "https://www.google.com",
+      titlePattern: /Google/,
+    },
+    {
+      url: "https://chatgpt.com/share/6891af68-d7fc-8010-a6b2-a4b7edad160b",
+      titlePattern: /ChatGPT - Split commit into files/,
+    },
+    {
+      url: "https://www.perplexity.ai/search/a-browser-question-in-the-atta-fqTG2DhRQRmjFVHXNXwG.Q-first, open-source knowledge base/",
+      titlePattern: /Just a moment.../,
+    },
   ];
 
   // Skip all web tests unless explicitly enabled
@@ -55,7 +79,7 @@ describe("fetchPageTitle from the web", () => {
           result = await fetchPageTitle(url);
 
           if (isVerbose) {
-            console.log(`✅ Result for ${url}:`, result);
+            console.log(`✅ fetchPageTitle for ${url}:`, result);
           }
         } catch (error) {
           if (isVerbose) {
@@ -76,7 +100,7 @@ describe("fetchPageTitle from the web", () => {
 
         if (gotActualMetadata && titlePattern) {
           expect(result.title).toMatch(titlePattern);
-          console.log(`✅ Got metadata for ${url}: "${result.title}"`);
+          console.log(`✅ Got metadata title for ${url}: "${result.title}"`);
         } else {
           expect(result.title).toBe(url);
           console.log(`⚠️ Got fallback for ${url} (API may be rate-limited)`);
@@ -97,14 +121,14 @@ describe("fetchPageTitle from the web", () => {
       "https://this-domain-definitely-does-not-exist-12345.com";
     const result = await fetchPageTitle(invalidUrl);
 
-    // Should fallback to some form of the URL when fetch fails
-    // The API might return the URL with or without the protocol
+    // The real microlink.io API returns the domain name as title for non-existent domains
+    // This is different from mock test behavior where we simulate actual failures
     expect(result).toHaveProperty("title");
     expect(result).toHaveProperty("hasIcon", false);
-    expect(
-      result.title === invalidUrl ||
-        result.title === "this-domain-definitely-does-not-exist-12345.com"
-    ).toBe(true);
+    // For non-existent domains, the API typically returns the domain name as title
+    expect(result.title).toBe(
+      "this-domain-definitely-does-not-exist-12345.com"
+    );
   }, 5000);
 
   it("should handle slow responses within timeout", async () => {

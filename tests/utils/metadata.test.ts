@@ -99,16 +99,15 @@ describe("fetchPageTitle", () => {
   });
 
   describe("fallback behavior", () => {
-    it("should handle missing title by using URL as fallback", async () => {
+    it("should handle missing title by returning null", async () => {
       mockFetchSuccess({
-        title: null,
         logo: "https://example.com/logo.png",
       });
 
       const result = await fetchPageTitle("https://example.com");
 
       expect(result).toEqual({
-        title: "https://example.com",
+        title: null,
         hasIcon: true,
       });
     });
@@ -124,7 +123,7 @@ describe("fetchPageTitle", () => {
       const result = await fetchPageTitle("https://example.com");
 
       expect(result).toEqual({
-        title: "https://example.com",
+        title: null,
         hasIcon: false,
         note: "API may be rate-limited or unavailable",
       });
@@ -136,7 +135,7 @@ describe("fetchPageTitle", () => {
       const result = await fetchPageTitle("https://example.com");
 
       expect(result).toEqual({
-        title: "https://example.com",
+        title: null,
         hasIcon: false,
         note: "API may be rate-limited or unavailable",
       });
@@ -153,7 +152,7 @@ describe("fetchPageTitle", () => {
       const result = await fetchPageTitle("https://example.com");
 
       expect(result).toEqual({
-        title: "https://example.com",
+        title: null,
         hasIcon: false,
         note: "API may be rate-limited or unavailable",
       });
@@ -286,14 +285,14 @@ describe("processBlockContentForURLs", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("should use URL as title when page title fetch fails", async () => {
+  it("should leave URL unchanged when page title fetch fails", async () => {
     mockFetchError(new Error("Network error"));
 
     const content = "Check out https://example.com";
     const result = await processBlockContentForURLs(content);
 
-    // When fetch fails, fetchPageTitle falls back to using the URL as title
-    expect(result).toBe("Check out [https://example.com](https://example.com)");
+    // When fetch fails, the URL is left unchanged (not processed)
+    expect(result).toBe("Check out https://example.com");
     expect(mockFetch).toHaveBeenCalledWith(
       "https://api.microlink.io/?url=https%3A%2F%2Fexample.com"
     );
