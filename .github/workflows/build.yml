@@ -1,0 +1,46 @@
+name: Build plugin
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  PLUGIN_NAME: logseq-plugin-url-to-markdown
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Package plugin
+        run: |
+          mkdir ${{ env.PLUGIN_NAME }}
+          cp README.md package.json manifest.json ${{ env.PLUGIN_NAME }}
+          cp assets/icon.ico ${{ env.PLUGIN_NAME }}/icon.ico
+          mv dist ${{ env.PLUGIN_NAME }}
+          zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
+          ls -la
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLUGIN_NAME }}-${{ github.sha }}
+          path: ${{ env.PLUGIN_NAME }}.zip
+          retention-days: 30
