@@ -3,7 +3,7 @@ import {processBlockContentForURLs} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 3.9.1");
+  console.log("main url-to-markdown 4.0.0");
 
   // Register plugin settings
   logseq.useSettingsSchema([
@@ -35,7 +35,7 @@ async function main() {
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {
     console.log(
-      `📥 DB.onChanged event: ${e}, e.txMeta.outlinerOp: ${e.txMeta.outlinerOp}`
+      `📥 DB.onChanged event: ${e}, e.txMeta?.outlinerOp: ${e.txMeta?.outlinerOp}`
     );
     if (e.blocks && Array.isArray(e.blocks)) {
       for (const block of e.blocks) {
