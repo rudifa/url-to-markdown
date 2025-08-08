@@ -1,13 +1,32 @@
 {
     "name": "url-to-markdown",
-    "version": "0.1.0",
+    "version": "0.9.0",
+    "description": "A Logseq plugin that automatically converts URLs to markdown with titles and favicons",
     "main": "dist/index.html",
     "type": "module",
+    "author": "rudifa",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rudifa/url-to-markdown.git"
+    },
+    "homepage": "https://github.com/rudifa/url-to-markdown",
+    "bugs": {
+        "url": "https://github.com/rudifa/url-to-markdown/issues"
+    },
+    "keywords": [
+        "logseq",
+        "plugin",
+        "markdown",
+        "url",
+        "favicon",
+        "metadata"
+    ],
     "scripts": {
-        "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser && cp index.html dist/plugin.html && cp index.html dist/index.html",
-        "dev": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=browser --watch && cp index.html dist/plugin.html",
-        "build:visual-test": "esbuild src/visual-test-entry.ts --bundle --outfile=dist/visual-test.js --format=iife --platform=browser && cp visual-test-template.html dist/visual-test.html && cp assets/favicon.svg dist/favicon.svg",
-        "dev:visual-test": "esbuild src/visual-test-entry.ts --bundle --outfile=dist/visual-test.js --format=iife --platform=browser --watch",
+        "build": "./scripts/build.sh main",
+        "build:visual-test": "./scripts/build.sh visual-test",
+        "dev": "./scripts/build.sh main --watch",
+        "dev:visual-test": "./scripts/build.sh visual-test --watch",
         "serve:visual-test": "npm run build:visual-test && cd dist && python3 -m http.server 3003 --bind 127.0.0.1",
         "test": "vitest run",
         "test:watch": "vitest --watch",

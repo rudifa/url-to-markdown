@@ -2,7 +2,7 @@
     "id": "url-to-markdown",
     "name": "URL to Markdown",
     "main": "index.html",
-    "description": "Converts pasted or typed URLs into Markdown links with titles and favicons",
-    "author": "@rudifa",
-    "version": "0.1.0"
+    "description": "A Logseq plugin that automatically converts URLs to markdown with titles and favicons",
+    "author": "rudifa",
+    "version": "0.9.0"
 }
