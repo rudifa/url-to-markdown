@@ -4,7 +4,9 @@ This directory contains static assets that are copied to the `dist/` directory d
 
 ## Files
 
-- `favicon.svg` - Icon for the visual test runner, copied to `dist/favicon.svg` during `npm run build:visual-test`
+- `favicon.svg` - New document-style favicon with star and chain links, copied to `dist/favicon.svg` during build
+- `favicon-new.svg` - Development version with debug lines (for reference)
+- `icon.ico` - Legacy ICO format favicon for maximum compatibility
 
 ## Usage
 
