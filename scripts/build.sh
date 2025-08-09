@@ -14,7 +14,7 @@ print_usage() {
   cat <<EOF
 Usage:
   $SCRIPT_NAME main         Build main plugin (index.ts -> dist/index.js)
-  $SCRIPT_NAME visual-test  Build visual test (assets/visual-test.ts -> dist/visual-test.js)
+  $SCRIPT_NAME visual-test  Build visual test (assets/visual-test.ts -> dist-dev/visual-test.js)
 EOF
 }
 
@@ -34,15 +34,18 @@ build_main() {
 build_visual_test() {
   echo "Building visual test..."
 
+  # Create dist-dev for development builds
+  mkdir -p dist-dev
+
   esbuild assets/visual-test.ts \
     $COMMON_OPTS \
-    --outfile=dist/visual-test.js \
+    --outfile=dist-dev/visual-test.js \
     --format=iife \
     --platform=browser
 
   echo "Copying visual test assets..."
-  cp assets/visual-test.html dist/visual-test.html
-  cp assets/favicon.svg dist/favicon.svg
+  cp assets/visual-test.html dist-dev/visual-test.html
+  cp assets/favicon.svg dist-dev/favicon.svg
 }
 
 main() {

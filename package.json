@@ -25,9 +25,10 @@
     "scripts": {
         "build": "./scripts/build.sh main",
         "build:visual-test": "./scripts/build.sh visual-test",
-        "serve:visual-test": "npm run build:visual-test && cd dist && python3 -m http.server 3003 --bind 127.0.0.1",
+        "serve:visual-test": "npm run build:visual-test && cd dist-dev && python3 -m http.server 3003 --bind 127.0.0.1",
         "serve:visual-test:auto": "./scripts/dev-server-auto.sh",
         "serve:visual-test:dev": "./scripts/dev-server.sh",
+        "dev:hmr": "./scripts/hmr-server.sh",
         "test": "vitest run",
         "test:ui": "vitest --ui",
         "test:web": "RUN_WEB_TESTS=true vitest run"

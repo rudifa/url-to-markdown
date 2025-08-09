@@ -156,3 +156,10 @@ async function processBlockForURLs(blockUuid: string) {
 
 // Initialize the plugin
 logseq.ready(main).catch(console.error);
+
+// Development mode detection
+if (import.meta.url.includes("localhost:5173")) {
+  console.log("🔗 URL to Markdown plugin initialized with HMR");
+} else {
+  console.log("🔗 URL to Markdown plugin initialized");
+}

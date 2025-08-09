@@ -12,12 +12,12 @@ RELOAD_SCRIPT="auto-reload.js"
 echo "🧹 Cleaning up any existing server on port ${PORT}..."
 pkill -f "python3 -m http.server ${PORT}" 2>/dev/null || true
 
-echo "🔨 Building visual test..."
+echo "🔨 Building visual test to dist-dev..."
 npm run build:visual-test
 
-# Create auto-reload script
+# Create auto-reload script in dist-dev
 echo "📡 Setting up auto-reload mechanism..."
-cat > "dist/${RELOAD_SCRIPT}" << 'EOF'
+cat > "dist-dev/${RELOAD_SCRIPT}" << 'EOF'
 // Auto-reload mechanism - checks for file changes
 (function() {
     let lastTimestamp = null;
@@ -50,12 +50,12 @@ echo "📝 Watching src/ and assets/ for changes..."
 echo "🔄 Browser will auto-refresh on changes!"
 echo ""
 
-# Start HTTP server in background
-(cd dist && python3 -m http.server ${PORT} --bind 127.0.0.1 >/dev/null 2>&1 &)
+# Start HTTP server in background from dist-dev
+(cd dist-dev && python3 -m http.server ${PORT} --bind 127.0.0.1 >/dev/null 2>&1 &)
 
 # Start file watcher with timestamp creation
 npx nodemon \
   --watch src \
   --watch assets \
   --ext ts,html,svg \
-  --exec 'npm run build:visual-test && echo "$(date +%s)" > dist/build-timestamp.txt && echo "🔄 Auto-rebuilt at $(date +%H:%M:%S) - browser will refresh automatically"'
+  --exec 'npm run build:visual-test && echo "$(date +%s)" > dist-dev/build-timestamp.txt && echo "🔄 Auto-rebuilt at $(date +%H:%M:%S) - browser will refresh automatically"'

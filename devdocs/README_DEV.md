@@ -19,11 +19,32 @@ npm run build
 
 ## Development Workflow
 
+### **🔥 Hot Module Replacement (HMR) Development**
+
 ```bash
-# Make changes to src/
-npm run build              # Build main plugin
-npm run build:visual-test  # Build visual test runner
-# Reload plugin in LogSeq to see changes
+# Start HMR development server
+npm run dev:hmr
+
+# In LogSeq:
+# Settings → Advanced → Developer mode → Load Unpacked Plugin
+# Select: /path/to/project/dist-dev/
+# Edit src/ files → Auto-rebuild → Click "Reload" in LogSeq → See changes instantly
+```
+
+### **📊 Visual Testing (Standalone Browser)**
+
+```bash
+npm run serve:visual-test        # One-time serve
+npm run serve:visual-test:dev    # Manual refresh development
+npm run serve:visual-test:auto   # Auto-refresh on file changes
+# Open: http://127.0.0.1:3003/visual-test.html
+```
+
+### **🏗️ Production Builds**
+
+```bash
+npm run build                    # Production build to dist/
+npm run build:visual-test        # Visual test build to dist-dev/
 ```
 
 ## Project Structure
@@ -45,27 +66,47 @@ url-to-markdown/
 │   ├── visual-test.html   # Visual test runner interface
 │   └── visual-test.ts     # Visual test entry point
 ├── scripts/
-│   └── build.sh           # esbuild-based build script
-├── dist/                  # Build output (git-ignored)
-├── index.html             # Plugin HTML entry point
-├── manifest.json          # LogSeq plugin manifest
+│   ├── build.sh           # esbuild-based build script
+│   ├── dev-server.sh      # Visual test development server
+│   ├── dev-server-auto.sh # Auto-refresh visual test server
+│   └── hmr-server.sh      # HMR development server for LogSeq
+├── dist/                  # Production build output (git-ignored)
+├── dist-dev/              # Development build output (git-ignored)
+├── index.html             # Production plugin HTML entry point
+├── index.dev.html         # Development plugin HTML (loads from HMR)
+├── manifest.json          # Production LogSeq plugin manifest
+├── manifest.dev.json      # Development LogSeq plugin manifest
 └── package.json           # Dependencies & scripts
 ```
 
 ## Build System
 
-**Modern esbuild-based build:**
+**Modern esbuild-based build with HMR support:**
 
 - TypeScript compilation with ES modules
-- Bundle splitting for main plugin vs visual tests
-- No watch mode (removed for simplicity)
+- Clean separation: `dist/` (production) vs `dist-dev/` (development)
+- Hot Module Replacement for rapid development
+- Multiple development server options
 
 **Build targets:**
 
 ```bash
+# Production builds
 npm run build              # Main plugin: src/index.ts → dist/index.js
-npm run build:visual-test  # Visual tests: assets/visual-test.ts → dist/visual-test.js
+
+# Development builds
+npm run build:visual-test  # Visual tests: assets/visual-test.ts → dist-dev/visual-test.js
+npm run dev:hmr            # HMR server: src/index.ts → dist-dev/index.js (live)
+
+# Development servers
+npm run serve:visual-test:dev   # Visual test with manual refresh
+npm run serve:visual-test:auto  # Visual test with auto-refresh
 ```
+
+**Directory purposes:**
+
+- `dist/` - Clean production builds only (for LogSeq Marketplace)
+- `dist-dev/` - Development artifacts, HMR assets, visual tests
 
 ## Testing
 
@@ -89,18 +130,39 @@ npm run test:ui           # Visual test interface
 
 ## Visual Testing
 
-**Interactive test runner for manual testing:**
+**Multiple development modes for different needs:**
+
+### **🚀 Auto-refresh Mode (Recommended)**
 
 ```bash
-npm run serve:visual-test  # Build and serve at http://127.0.0.1:3003
+npm run serve:visual-test:auto  # Auto-refresh on file changes
+# Open: http://127.0.0.1:3003/visual-test.html
+# Edit src/ → Auto-rebuild → Browser refreshes automatically
 ```
 
-Features:
+### **⚡ Manual Refresh Mode**
+
+```bash
+npm run serve:visual-test:dev   # Manual refresh after rebuild
+# Open: http://127.0.0.1:3003/visual-test.html
+# Edit src/ → Auto-rebuild → Manual browser refresh
+```
+
+### **📊 One-time Mode**
+
+```bash
+npm run serve:visual-test       # Single build and serve
+# Open: http://127.0.0.1:3003/visual-test.html
+```
+
+**Features:**
 
 - Real-time URL detection testing
 - Live metadata fetching from actual APIs
 - Production code testing (not mocked)
 - Favicon integration preview
+- File watching with automatic rebuilds
+- Browser auto-refresh capabilities
 
 ## Architecture
 
@@ -185,26 +247,40 @@ logseq.useSettingsSchema([
 - URL processing results visible in LogSeq dev tools
 - API call timing and results for performance monitoring
 
+**HMR Development debugging:**
+
+- Use `npm run dev:hmr` for rapid iteration in LogSeq
+- Edit source → Auto-rebuild → Click "Reload" → Instant feedback
+- LogSeq dev tools show real plugin behavior
+
 **Visual debugging:**
 
-- Use `npm run serve:visual-test` for interactive debugging
+- Use `npm run serve:visual-test:auto` for standalone debugging
 - Real-time URL detection and metadata fetching
 - Production code testing without LogSeq overhead
+- Auto-refresh eliminates manual reload cycles
 
 ## Contributing
 
 1. **Fork and clone** the repository
 2. **Install dependencies:** `npm install`
-3. **Make changes** to `src/` files
-4. **Test thoroughly:** `npm test` and `npm run test:web`
-5. **Visual test:** `npm run serve:visual-test`
-6. **Build:** `npm run build`
-7. **Test in LogSeq** with unpacked plugin
-8. **Submit PR** with clear description
+3. **Start HMR development:** `npm run dev:hmr`
+4. **Load plugin in LogSeq** from `dist-dev/` folder
+5. **Make changes** to `src/` files (auto-rebuild enabled)
+6. **Test thoroughly:**
+   - `npm test` (fast unit tests)
+   - `npm run test:web` (real API integration tests)
+   - `npm run serve:visual-test:auto` (visual testing)
+7. **Production build:** `npm run build`
+8. **Final test in LogSeq** with production build from `dist/`
+9. **Submit PR** with clear description
 
 **Development tips:**
 
-- Use fast `npm test` for quick iteration
-- Use `npm run test:web` before submitting PRs
-- Visual test runner shows real behavior
-- LogSeq dev tools show plugin console output
+- **Use HMR workflow** (`npm run dev:hmr`) for rapid LogSeq plugin iteration
+- **Use auto-refresh visual tests** (`npm run serve:visual-test:auto`) for UI debugging
+- **Fast feedback loop:** Edit → Auto-rebuild → Reload → Test
+- **Use fast `npm test`** for quick iteration on logic
+- **Use `npm run test:web`** before submitting PRs to validate real APIs
+- **Check both `dist/` and `dist-dev/`** are working as expected
+- **LogSeq dev tools** show plugin console output and errors

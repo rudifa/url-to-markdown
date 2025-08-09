@@ -18,4 +18,5 @@ node_modules
 # build
 /_site/
 /dist/
+/dist-dev/
 /bin/
