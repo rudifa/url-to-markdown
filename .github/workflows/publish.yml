@@ -35,6 +35,12 @@ jobs:
           mkdir ${{ env.PLUGIN_NAME }}
           cp README.md package.json manifest.json ${{ env.PLUGIN_NAME }}
           cp assets/favicon.svg ${{ env.PLUGIN_NAME }}/favicon.svg
+          # Copy img folder for README.md references
+          if [ -d "img" ]; then
+            cp -r img ${{ env.PLUGIN_NAME }}/img
+          else
+            echo "Warning: img folder not found, README.md images may not display"
+          fi
           mv dist ${{ env.PLUGIN_NAME }}
           zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
           ls -la
