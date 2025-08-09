@@ -1,227 +1,98 @@
 # URL to Markdown (Logseq Plugin)
 
-This plugin detects pasted URLs in the Logseq editor and replaces them with Markdown links that include the page title and optionally favicon icons.
+This plugin converts pasted or typed URLs into clean Markdown links with the page title and optional favicon.
 
-## Features
+You type or paste a URL into a Logseq page; the plugin replaces the raw URL with a Markdown link, like this:
 
-- **Automatic URL Detection**: Detects raw URLs in blocks and converts them to markdown links
-- **Page Title Fetching**: Automatically fetches and uses the actual page title
-- **Favicon Support**: Optionally adds favicon icons to links for visual enhancement
-- **Configurable Options**: Control favicon size, position, and enable/disable functionality
-- **Non-intrusive**: Only processes raw URLs, leaves existing markdown links unchanged
+- _raw URL_: My note taking application: <https://logseq.com>
 
-## Usage
+- _markdown with favicon_: My note taking application: ![logseq.com-favicon](https://www.google.com/s2/favicons?domain=logseq.com&sz=16) [A privacy-first, open-source knowledge base](https://logseq.com)
 
-### Basic Usage
+- _markdown without favicon_: My note taking application: [A privacy-first, open-source knowledge base](https://logseq.com)
 
-Paste a URL in the editor and wait a moment — it will auto-convert to:
+## Install
 
-```md
-[Example Domain](https://example.com)
-```
+You can install the plugin in two ways:
 
-### With Favicons Enabled
+### From the Logseq Marketplace (not yet available)
 
-When favicons are enabled, links will include the site's favicon:
+- Open Logseq → Plugins → Marketplace.
+- Search for “URL to Markdown”.
+- Click Install and enable the plugin.
 
-```md
-![github.com-favicon](https://www.google.com/s2/favicons?domain=github.com&sz=16) [GitHub](https://github.com)
-```
+### From the GitHub repo releases
 
-## Configuration
+- Download the latest release from the [GitHub releases page](https://github.com/rudifa/url-to-markdown/releases).
+- In Logseq: Plugins → Load unpacked plugin → select the `dist` folder inside the downloaded release.
 
-Access plugin settings through Logseq's Settings → Plugins → URL to Markdown:
+## Configure
 
-- **Enable Favicons**: Toggle favicon functionality on/off (default: true)
-- **Favicon Size**: Set favicon size in pixels (default: 16)
-- **Favicon Position**: Choose to show favicons before or after the link text (default: before)
+Open Logseq → Plugins → URL to Markdown → Settings. Options:
 
-## Plugin build
+- Enable Favicons (default: on)
+  - Add a site icon to the link.
+- Favicon Size (default: 16)
+  - Icon size in pixels.
+- Favicon Position (default: before)
+  - Place the favicon before or after the link text.
 
-```bash
-npm install
-npm run build
-```
+## Use
 
-## Plugin install
+There are three common flows:
 
-1. Open Logseq
-2. Go to Settings → Plugins → Load unpacked plugin
-3. In the file dialog, select the root folder of this plugin, `url-to-markdown`
-4. The plugin should now be loaded and active
+### Type a URL
 
-## Plugin development
+Type a URL directly into your Logseq page.
 
-1. Modify the `src/index.ts` file
-2. Run `npm run build` to compile the TypeScript code into JavaScript and bundle it with the Logseq API into the `dist/index.js` file
-3. Reload the plugin in Logseq to see the changes
+Plugin will convert it automatically to a Markdown link with the page title (and favicon if enabled). Press Enter to see the result.
 
-## Plugin source code structure
+![Typing demo](gif/type.gif)
 
-````
-url-to-markdown/
-├── src/
-│   ├── utils/               # Utility functions for URL detection and metadata fetching
-│   │   ├── metadata.ts
-│   │   └── urlFind.ts
-│   └── index.ts             # Main plugin code
-├── tests
-│   ├── utils/               # Test files for utility functions
-│   │   ├── metadata.test.ts
-│   │   └── urlFind.test.ts
-│   ├── README.md
-│   └── browserTests.js
-├── dist/                     # Built output (generated)
-├── index.html                # Plugin entry point
-├── package.json              # Dependencies and build scripts
-├── tsconfig.json             # TypeScript configuration
-├── manifest.json             # LogSeq plugin manifest
-└── README.md                 # Project documentation
+### Paste a URL
 
-## Testing
+Paste any text containing http(s) URLs into your Logseq page.
 
-This project uses [Vitest](https://vitest.dev/) for comprehensive testing with both unit tests and integration tests.
+Plugin will convert it automatically ... press Enter to see the result.
 
-### Quick Start
+![Paste demo](gif/paste.gif)
 
-```bash
-# Install dependencies
-npm install
+### Convert existing URLs
 
-# Run fast tests (mock tests only)
-npm test
+If you have existing pages with raw URLs, the plugin will automatically convert the URLs to Markdown links when you open these pages.
 
-# Run all tests including web integration tests
-npm run test:web
+## Shared links
 
-# Run tests with verbose metadata logging
-npm run test:verbose
+Some sites (e.g. ChatGPT) have the option to create shared links. If you paste a shared link into your Logseq page, the plugin will get the actual page title, while pasted basic, non-shared link the plugin will get only a generic title (e.g. "ChatGPT").
 
-# Run web tests with full verbose output
-npm run test:web:verbose
-````
+## How it works (brief)
 
-### Test Scripts
+- Detects raw URLs in page blocks and replaces them with Markdown links.
+- Fetches page titles via Microlink API and favicons via Google’s S2 favicon service when favicons are enabled.
 
-| Command                    | Description                              | Use Case               |
-| -------------------------- | ---------------------------------------- | ---------------------- |
-| `npm test`                 | Fast tests only (skips web tests)        | Development, CI/CD     |
-| `npm run test:fast`        | Same as `npm test`                       | Explicit fast testing  |
-| `npm run test:web`         | All tests including web requests         | Integration validation |
-| `npm run test:web:verbose` | Web tests with detailed API logging      | API debugging          |
-| `npm run test:verbose`     | Mock tests with verbose metadata logging | Development debugging  |
-| `npm run test:all`         | Same as `test:web`                       | Comprehensive testing  |
-| `npm run test:all:verbose` | All tests with full verbose output       | Complete debugging     |
-| `npm run test:watch`       | Watch mode for development               | Active development     |
-| `npm run test:ui`          | Visual test interface                    | Interactive testing    |
+## Privacy & Networking
 
-### Environment Variables
+To enrich links, the plugin makes network requests to:
 
-| Variable           | Values         | Description                                   |
-| ------------------ | -------------- | --------------------------------------------- |
-| `RUN_WEB_TESTS`    | `true`/`false` | Enable real HTTP requests to external APIs    |
-| `VERBOSE_METADATA` | `true`/`false` | Enable detailed logging for metadata fetching |
+- <https://api.microlink.io> – to fetch the page title.
+- <https://www.google.com/s2/favicons> – to fetch site favicons.
 
-**Examples:**
+If you prefer not to use favicons, disable “Enable Favicons” in settings.
 
-```bash
-# Run only web tests with verbose output
-RUN_WEB_TESTS=true VERBOSE_METADATA=true npm test
+If you work offline and add URLs, the plugin won’t be able to fetch titles and favicons. However, it will convert them later, when you open such pages while online.
 
-# Run specific test file with verbose logging
-VERBOSE_METADATA=true npx vitest tests/utils/metadata.test.ts
-```
+## Troubleshooting
 
-### Test Categories
+- Nothing happens when pasting/typing a URL
 
-#### 🎭 **Mock Tests (Fast & Reliable)**
+  - Ensure the plugin is enabled and you have the latest version.
+  - Check your internet connection (required for titles/favicons).
+  - Some pages don’t expose titles/metadata; the URL may be left as-is.
+  - Try disabling favicons to see if conversion works without the icon.
 
-- **URL Detection**: 13 tests validating `findFormattedURLs`, `findRawURLs`, `analyzeBlockURLs`
-- **Metadata Fetching**: 10 tests with mocked API responses
-- **Coverage**: All edge cases, error handling, coordinate validation
-- **Speed**: ~300ms execution time
+- Wrong or missing title
+  - The external metadata service may not have the correct info. You can edit the link text manually after conversion.
 
-#### 🌐 **Web Integration Tests (Realistic)**
+## Support
 
-- **Real HTTP Requests**: Tests actual microlink.io API calls
-- **Fallback Validation**: Verifies graceful handling when API is unavailable
-- **URLs Tested**: GitHub, Stack Overflow, npm, Vitest, LogSeq
-- **Environment Control**: Only runs with `RUN_WEB_TESTS=true`
-
-### Test Results
-
-```bash
-# Fast tests (default)
-✓ tests/utils/urlFind.test.ts (13 tests)
-✓ tests/utils/metadata.test.ts (10 tests)
-⏭️ Web tests: 7 skipped
-📊 Total: 30 passed | 1 skipped
-
-# Web tests (with RUN_WEB_TESTS=true)
-✓ tests/utils/urlFind.test.ts (13 tests)
-✓ tests/utils/metadata.test.ts (10 tests)
-🌐 tests/utils/metadata.test.ts web tests (7 tests)
-📊 Total: 30 passed | 1 skipped
-```
-
-### Environment Variables
-
-- `RUN_WEB_TESTS=true` - Enables web integration tests
-- Default behavior skips web tests for faster development
-
-### Test Files Structure
-
-```
-tests/
-├── utils/
-│   ├── urlFind.test.ts     # URL detection & parsing tests
-│   └── metadata.test.ts    # Metadata fetching tests (mock + web)
-```
-
-## Visual Testing
-
-The project includes a comprehensive visual test runner for manual testing and development.
-
-### Visual Test Scripts
-
-| Command                     | Description                  | Access                                   |
-| --------------------------- | ---------------------------- | ---------------------------------------- |
-| `npm run build:visual-test` | Build visual test runner     | Creates `dist/visual-test.html`          |
-| `npm run dev:visual-test`   | Development mode with watch  | Auto-rebuilds on file changes            |
-| `npm run serve:visual-test` | Build and serve visual tests | <http://127.0.0.1:3003/visual-test.html> |
-
-### Visual Test Features
-
-- **URL Detection Testing**: Interactive table showing how different text inputs are parsed
-- **Real Metadata Fetching**: Live API calls with timing, icons, and error handling
-- **Production Code Testing**: Uses actual production modules (not copies)
-- **Professional Interface**: Clean tables, loading states, status indicators
-
-### Manual Visual Testing
-
-```bash
-# Option 1: Use npm script (recommended)
-npm run serve:visual-test
-# Opens server at <http://127.0.0.1:3003/visual-test.html>
-
-# Option 2: Manual server setup
-npm run build:visual-test
-cd dist
-python3 -m http.server 3003
-# Navigate to <http://localhost:3003/visual-test.html>
-
-# Option 3: VS Code Live Server
-# Install Live Server extension, then right-click dist/visual-test.html
-```
-
-The visual test runner automatically displays URL detection results and provides a button to test real metadata fetching from various popular websites.
-
-### CI/CD Recommendations
-
-```yaml
-# Fast CI pipeline
-- run: npm test # Skips unstable web tests
-
-# Comprehensive validation (optional)
-- run: npm run test:web # Includes external API tests
-```
+Issues, ideas, or questions? Open an issue on GitHub:
+[Open an issue](https://github.com/rudifa/url-to-markdown/issues)

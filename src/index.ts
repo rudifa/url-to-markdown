@@ -3,7 +3,7 @@ import {processBlockContentForURLs} from "./utils/metadata";
 
 // Main function
 async function main() {
-  console.log("main url-to-markdown 4.0.0");
+  console.log(`main url-to-markdown ${__PKG_VERSION__}`);
 
   // Register plugin settings
   logseq.useSettingsSchema([
