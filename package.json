@@ -25,15 +25,10 @@
     "scripts": {
         "build": "./scripts/build.sh main",
         "build:visual-test": "./scripts/build.sh visual-test",
-        "dev": "./scripts/build.sh main --watch",
-        "dev:visual-test": "./scripts/build.sh visual-test --watch",
         "serve:visual-test": "npm run build:visual-test && cd dist && python3 -m http.server 3003 --bind 127.0.0.1",
         "test": "vitest run",
-        "test:watch": "vitest --watch",
         "test:ui": "vitest --ui",
-        "test:web": "RUN_WEB_TESTS=true vitest run",
-        "test:web:verbose": "RUN_WEB_TESTS=true VERBOSE_METADATA=true vitest run",
-        "test:verbose": "VERBOSE_METADATA=true vitest run"
+        "test:web": "RUN_WEB_TESTS=true vitest run"
     },
     "dependencies": {
         "@logseq/libs": "^0.2.1"

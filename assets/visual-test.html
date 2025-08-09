@@ -265,6 +265,35 @@
         padding: 15px;
         border-radius: 6px;
       }
+
+      /* Favicon showcase styles */
+      .favicon-showcase {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin: 20px 0;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+      }
+      .favicon-size-demo {
+        text-align: center;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 6px;
+        min-width: 80px;
+      }
+      .favicon-size-demo img {
+        margin: 5px 0;
+        vertical-align: middle;
+      }
+      .favicon-size-demo .size-label {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 5px;
+      }
     </style>
   </head>
   <body>
@@ -303,6 +332,29 @@
           🎨 Generate Favicon Markdown
         </button>
         <button class="btn" onclick="runAllTests()">🚀 Run All Tests</button>
+      </div>
+
+      <div class="test-section">
+        <h3>🎨 Favicon Size Preview</h3>
+        <p>Preview of the favicon.svg at different sizes used in the plugin:</p>
+        <div class="favicon-showcase">
+          <div class="favicon-size-demo">
+            <img src="favicon.svg" alt="favicon 16px" width="16" height="16" />
+            <div class="size-label">16px (default)</div>
+          </div>
+          <div class="favicon-size-demo">
+            <img src="favicon.svg" alt="favicon 24px" width="24" height="24" />
+            <div class="size-label">24px</div>
+          </div>
+          <div class="favicon-size-demo">
+            <img src="favicon.svg" alt="favicon 32px" width="32" height="32" />
+            <div class="size-label">32px</div>
+          </div>
+          <div class="favicon-size-demo">
+            <img src="favicon.svg" alt="favicon 48px" width="48" height="48" />
+            <div class="size-label">48px</div>
+          </div>
+        </div>
       </div>
 
       <div class="test-section">
