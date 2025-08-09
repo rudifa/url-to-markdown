@@ -43,6 +43,8 @@
         "vitest": "^3.2.4"
     },
     "logseq": {
-        "id": "_ollalogvj"
+        "id": "_ollalogvj",
+        "title": "URL to Markdown",
+        "icon": "./assets/favicon.svg"
     }
 }
