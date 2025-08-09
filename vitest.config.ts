@@ -1,8 +1,4 @@
 import {defineConfig} from "vitest/config";
-import {fetch} from "undici";
-
-// Polyfill fetch for Node.js test environment
-globalThis.fetch = fetch as typeof globalThis.fetch;
 
 export default defineConfig({
   test: {
@@ -10,6 +6,8 @@ export default defineConfig({
     include: ["tests/**/*.{test,spec}.{js,ts}"],
     // Environment setup
     environment: "node",
+    // Setup file for global polyfills and test configuration
+    setupFiles: ["./tests/setup.ts"],
   },
   // Resolve configuration for imports
   resolve: {
