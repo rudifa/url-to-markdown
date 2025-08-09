@@ -7,8 +7,11 @@ set -e
 
 SCRIPT_NAME=$(basename "$0")
 
+# Extract version from package.json reliably
+PKG_VERSION=$(node -p "require('./package.json').version")
+
 # Common esbuild options
-COMMON_OPTS="--bundle --define:__PKG_VERSION__=\"$npm_package_version\""
+COMMON_OPTS="--bundle --define:__PKG_VERSION__=\"$PKG_VERSION\""
 
 print_usage() {
   cat <<EOF

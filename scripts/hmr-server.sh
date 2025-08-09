@@ -9,6 +9,9 @@ PORT=5173
 DEV_SERVER_URL="http://localhost:${PORT}"
 PLUGIN_DIR="$(pwd)"
 
+# Extract version from package.json reliably
+PKG_VERSION=$(node -p "require('./package.json').version")
+
 echo "🔥 Starting LogSeq Plugin HMR Development Server..."
 echo "📦 Setting up development environment..."
 
@@ -51,7 +54,7 @@ echo ""
 # Start esbuild with serve and watch (live-reload not available in this version)
 npx esbuild src/index.ts \
   --bundle \
-  --define:__PKG_VERSION__=\"$npm_package_version\" \
+  --define:__PKG_VERSION__=\"$PKG_VERSION\" \
   --outfile=dist-dev/index.js \
   --format=esm \
   --platform=browser \
