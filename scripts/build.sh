@@ -42,7 +42,15 @@ build_main() {
     --platform=browser
 
   echo "Copying HTML files and assets..."
+
+  # Copy HTML file with error checking
+  if [[ ! -f index.html ]]; then
+    echo "Error: Source file index.html not found." >&2
+    exit 1
+  fi
   cp index.html dist/index.html
+
+  # Copy favicon with error checking
   if [[ ! -f assets/favicon.svg ]]; then
     echo "Error: Source file assets/favicon.svg not found." >&2
     exit 1
