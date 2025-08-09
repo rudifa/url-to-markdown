@@ -14,7 +14,7 @@ import {
 //   npm test                    # Skips all web tests (fast, reliable)
 //   RUN_WEB_TESTS=true npm test # Runs all web tests including real API calls (slower, realistic)
 
-const webTestTimeout = 3000; // 3 seconds
+const webTestTimeout = 10000; // 10 seconds
 // To enable verbose output, set VERBOSE_METADATA=true in your environment
 const isVerbose = process.env.VERBOSE_METADATA === "true";
 
