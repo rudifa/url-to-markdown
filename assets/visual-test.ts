@@ -1,12 +1,12 @@
 // Visual Test Runner Entry Point
 // This file imports the actual production code and sets up the visual test interface
 
-import {findFormattedURLs, findRawURLs} from "./utils/urlFind";
+import {findFormattedURLs, findRawURLs} from "../src/utils/urlFind";
 import {
   fetchPageTitle,
   fetchFaviconMarkdown,
   processBlockContentForURLs,
-} from "./utils/metadata";
+} from "../src/utils/metadata";
 
 // Re-export utilities for testing
 export {

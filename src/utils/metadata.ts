@@ -44,7 +44,7 @@ export async function processBlockContentForURLs(
     return content; // Return unchanged content
   }
 
-  console.log(`🔗 Found ${urlAnalysis.raw.length} raw URL(s) to process`);
+  //   console.log(`🔗 Found ${urlAnalysis.raw.length} raw URL(s) to process`);
 
   // Process URL list backwards to avoid coordinate shifting issues
   // When we replace URLs from last to first, the coordinates of earlier URLs remain valid
@@ -61,9 +61,9 @@ export async function processBlockContentForURLs(
         markdown +
         updatedContent.substring(rawURL.end);
 
-      console.log(`✅ Processed URL: ${rawURL.url}`);
+      //   console.log(`✅ Processed URL: ${rawURL.url}`);
     } else {
-      console.log(`⚠️ Skipped invalid URL: ${rawURL.url}`);
+      //   console.log(`⚠️ Skipped invalid URL: ${rawURL.url}`);
     }
   }
 
@@ -83,14 +83,14 @@ export async function processBlockContentForURLs(
 export async function processURLToMarkdown(
   url: string
 ): Promise<string | null> {
-  console.log(`🔗 Processing URL: ${url}`);
+  //   console.log(`🔗 Processing URL: ${url}`);
 
   // Get current plugin options
   const options = getFaviconOptions();
 
   // Fetch title and favicon in parallel when favicon is enabled
   if (options.includeFavicon) {
-    console.log(`🌐 Fetching title and favicon for: ${url}`);
+    // console.log(`🌐 Fetching title and favicon for: ${url}`);
 
     const [titleResult, faviconResult] = await Promise.allSettled([
       fetchPageTitle(url),
@@ -100,13 +100,13 @@ export async function processURLToMarkdown(
     // Handle title result
     const title = titleResult.status === "fulfilled" ? titleResult.value : null;
     if (!title) {
-      console.log(`⚠️ No title found for ${url}`);
+      //   console.log(`⚠️ No title found for ${url}`);
       return null;
     }
 
     // Create basic markdown
     let markdown = `[${title}](${url})`;
-    console.log(`✨ Generated basic markdown: ${markdown}`);
+    // console.log(`✨ Generated basic markdown: ${markdown}`);
 
     // Add favicon if successfully fetched
     if (faviconResult.status === "fulfilled" && faviconResult.value) {
@@ -115,7 +115,7 @@ export async function processURLToMarkdown(
         position === "before"
           ? `${faviconResult.value}  ${markdown}`
           : `${markdown}  ${faviconResult.value}`;
-      console.log(`🎨 Enhanced with favicon: ${markdown}`);
+      //   console.log(`🎨 Enhanced with favicon: ${markdown}`);
     } else if (faviconResult.status === "rejected") {
       console.warn(
         `⚠️ Failed to fetch favicon for ${url}:`,
@@ -126,7 +126,7 @@ export async function processURLToMarkdown(
     return markdown;
   } else {
     // Favicon not enabled - just fetch title
-    console.log(`🌐 Fetching title for: ${url}`);
+    // console.log(`🌐 Fetching title for: ${url}`);
     const title = await fetchPageTitle(url);
 
     if (!title) {
@@ -136,7 +136,7 @@ export async function processURLToMarkdown(
 
     // Create basic markdown without favicon
     const markdown = `[${title}](${url})`;
-    console.log(`✨ Generated basic markdown: ${markdown}`);
+    // console.log(`✨ Generated basic markdown: ${markdown}`);
     return markdown;
   }
 }

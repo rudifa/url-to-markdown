@@ -1,7 +1,10 @@
-// Test environment setup
+/**
+ * Test setup file for vitest
+ * Configures global polyfills and test environment setup
+ */
+
 import {fetch} from "undici";
 
 // Polyfill fetch for Node.js test environment
-// This ensures that when we remove the mock fetch in web tests,
-// there's a real fetch available
+// This ensures all tests have access to a reliable fetch implementation
 globalThis.fetch = fetch as any;

@@ -5,7 +5,7 @@ import {
   analyzeBlockURLs,
 } from "../../src/utils/urlFind.js";
 
-// Test data - simplified
+// Test data - single URL in the content (formatted or not)
 const testCasesSimple = {
   emptyContent: "",
   singleFormattedURL:
@@ -19,7 +19,7 @@ const testCasesSimple = {
     "I use https://astro.build/, built on top of node.",
 };
 
-// Test data - combined
+// Test data - multiple URLs in the content (formatted or not)
 const testCasesCombined = {
   emptyContent: "",
   multipleFormattedURLs:

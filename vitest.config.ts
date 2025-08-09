@@ -6,7 +6,7 @@ export default defineConfig({
     include: ["tests/**/*.{test,spec}.{js,ts}"],
     // Environment setup
     environment: "node",
-    // Global setup
+    // Setup file for global polyfills and test configuration
     setupFiles: ["./tests/setup.ts"],
   },
   // Resolve configuration for imports

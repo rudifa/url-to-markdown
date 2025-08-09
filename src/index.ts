@@ -34,9 +34,7 @@ async function main() {
 
   // Listen to block changes and process each changed block
   logseq.DB.onChanged(async (e: any) => {
-    console.log(
-      `📥 DB.onChanged event: ${e}, e.txMeta?.outlinerOp: ${e.txMeta?.outlinerOp}`
-    );
+    console.log("📥 DB.onChanged:", e);
     if (e.blocks && Array.isArray(e.blocks)) {
       for (const block of e.blocks) {
         if (block?.uuid) {
@@ -48,12 +46,12 @@ async function main() {
 
   // Listen to page changes and process each changed page
   logseq.App.onRouteChanged(async (e) => {
-    console.log("Route changed:", e);
+    console.log("📥 App.onRouteChanged:", e);
 
     // Extract page name from the route parameters
     const pageName = e.parameters?.path?.name;
     if (pageName && e.template === "/page/:name") {
-      console.log(`📄 Processing page: ${pageName}`);
+      //   console.log(`📄 Processing page: ${pageName}`);
 
       // Get all blocks from the page as a flat list
       const blocks = await getPageBlocks(pageName);
@@ -75,7 +73,7 @@ async function main() {
  */
 async function getPageBlocks(pageName: string): Promise<any[]> {
   try {
-    console.log(`🔍 Getting blocks for page: ${pageName}`);
+    // console.log(`🔍 Getting blocks for page: ${pageName}`);
 
     // Get the page entity
     const page = await logseq.Editor.getPage(pageName);
@@ -87,19 +85,19 @@ async function getPageBlocks(pageName: string): Promise<any[]> {
     // Get all blocks from the page
     const pageBlocks = await logseq.Editor.getPageBlocksTree(pageName);
     if (!pageBlocks || pageBlocks.length === 0) {
-      console.log(`📄 No blocks found on page: ${pageName}`);
+      //   console.log(`📄 No blocks found on page: ${pageName}`);
       return [];
     }
 
-    console.log(
-      `📄 Found ${pageBlocks.length} top-level blocks on page: ${pageName}`
-    );
+    // console.log(
+    //   `📄 Found ${pageBlocks.length} top-level blocks on page: ${pageName}`
+    // );
 
     // Flatten the block tree into a flat list
     const flatBlocks: any[] = [];
     flattenBlocks(pageBlocks, flatBlocks);
 
-    console.log(`📄 Total blocks (including nested): ${flatBlocks.length}`);
+    // console.log(`📄 Total blocks (including nested): ${flatBlocks.length}`);
     return flatBlocks;
   } catch (error) {
     console.error(`❌ Error getting page blocks for ${pageName}:`, error);
@@ -130,7 +128,7 @@ function flattenBlocks(blocks: any[], flatBlocks: any[]): void {
  */
 async function processBlockForURLs(blockUuid: string) {
   try {
-    console.log(`🔍 Processing block: ${blockUuid}`);
+    // console.log(`🔍 Processing block: ${blockUuid}`);
 
     // Get the block content
     const block = await logseq.Editor.getBlock(blockUuid);
@@ -147,9 +145,9 @@ async function processBlockForURLs(blockUuid: string) {
     if (updatedContent !== content) {
       // Update the block
       await logseq.Editor.updateBlock(blockUuid, updatedContent);
-      console.log(
-        `✅ Block ${blockUuid} content (updated):\n${updatedContent}\n`
-      );
+      //   console.log(
+      //     `✅ Block ${blockUuid} content (updated):\n${updatedContent}\n`
+      //   );
     }
   } catch (error) {
     console.error(`❌ Error processing block ${blockUuid}:`, error);

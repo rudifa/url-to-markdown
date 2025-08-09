@@ -46,7 +46,7 @@ Type a URL directly into your Logseq page.
 
 Plugin will convert it automatically to a Markdown link with the page title (and favicon if enabled). Press Enter to see the result.
 
-![Typing demo](gif/type.gif)
+![Typing demo](img/type.gif)
 
 ### Paste a URL
 
@@ -54,7 +54,7 @@ Paste any text containing http(s) URLs into your Logseq page.
 
 Plugin will convert it automatically ... press Enter to see the result.
 
-![Paste demo](gif/paste.gif)
+![Paste demo](img/paste.gif)
 
 ### Convert existing URLs
 
