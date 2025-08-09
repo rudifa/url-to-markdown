@@ -381,5 +381,21 @@
 
     <!-- Load the bundled production code -->
     <script src="visual-test.js"></script>
+
+    <!-- Auto-reload for development (only loads if file exists) -->
+    <script>
+      // Only load auto-reload in development
+      fetch("/auto-reload.js")
+        .then((response) => {
+          if (response.ok) {
+            const script = document.createElement("script");
+            script.src = "/auto-reload.js";
+            document.head.appendChild(script);
+          }
+        })
+        .catch(() => {
+          // Ignore - auto-reload not available (production mode)
+        });
+    </script>
   </body>
 </html>
