@@ -15,7 +15,8 @@ import {
 //   RUN_WEB_TESTS=true npm test # Runs all web tests including real API calls (slower, realistic)
 
 const webTestTimeout = 3000; // 3 seconds
-const isVerbose = false;
+// To enable verbose output, set VERBOSE_METADATA=true in your environment
+const isVerbose = process.env.VERBOSE_METADATA === "true";
 
 // Fetch pageTitle tests - these make real web calls and require RUN_WEB_TESTS
 describe("fetchPageTitle from the web", () => {
