@@ -36,7 +36,7 @@
         "test:verbose": "VERBOSE_METADATA=true vitest run"
     },
     "dependencies": {
-        "@logseq/libs": "^0.0.17"
+        "@logseq/libs": "^0.2.1"
     },
     "devDependencies": {
         "@types/dompurify": "^3.0.5",
