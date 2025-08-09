@@ -41,8 +41,13 @@ build_main() {
     --format=esm \
     --platform=browser
 
-  echo "Copying HTML files..."
+  echo "Copying HTML files and assets..."
   cp index.html dist/index.html
+  if [[ ! -f assets/favicon.svg ]]; then
+    echo "Error: Source file assets/favicon.svg not found." >&2
+    exit 1
+  fi
+  cp assets/favicon.svg dist/favicon.svg
 }
 
 build_visual_test() {
