@@ -1,6 +1,9 @@
 import "@logseq/libs";
 import {processBlockContentForURLs} from "./utils/metadata";
 
+// Development server configuration
+const DEV_SERVER_PORT = "5173";
+
 // Main function
 async function main() {
   console.log(`main url-to-markdown ${__PKG_VERSION__}`);
@@ -51,8 +54,6 @@ async function main() {
     // Extract page name from the route parameters
     const pageName = e.parameters?.path?.name;
     if (pageName && e.template === "/page/:name") {
-      //   console.log(`📄 Processing page: ${pageName}`);
-
       // Get all blocks from the page as a flat list
       const blocks = await getPageBlocks(pageName);
 
@@ -73,8 +74,6 @@ async function main() {
  */
 async function getPageBlocks(pageName: string): Promise<any[]> {
   try {
-    // console.log(`🔍 Getting blocks for page: ${pageName}`);
-
     // Get the page entity
     const page = await logseq.Editor.getPage(pageName);
     if (!page) {
@@ -85,19 +84,13 @@ async function getPageBlocks(pageName: string): Promise<any[]> {
     // Get all blocks from the page
     const pageBlocks = await logseq.Editor.getPageBlocksTree(pageName);
     if (!pageBlocks || pageBlocks.length === 0) {
-      //   console.log(`📄 No blocks found on page: ${pageName}`);
       return [];
     }
-
-    // console.log(
-    //   `📄 Found ${pageBlocks.length} top-level blocks on page: ${pageName}`
-    // );
 
     // Flatten the block tree into a flat list
     const flatBlocks: any[] = [];
     flattenBlocks(pageBlocks, flatBlocks);
 
-    // console.log(`📄 Total blocks (including nested): ${flatBlocks.length}`);
     return flatBlocks;
   } catch (error) {
     console.error(`❌ Error getting page blocks for ${pageName}:`, error);
@@ -128,8 +121,6 @@ function flattenBlocks(blocks: any[], flatBlocks: any[]): void {
  */
 async function processBlockForURLs(blockUuid: string) {
   try {
-    // console.log(`🔍 Processing block: ${blockUuid}`);
-
     // Get the block content
     const block = await logseq.Editor.getBlock(blockUuid);
     if (!block?.content) {
@@ -145,9 +136,6 @@ async function processBlockForURLs(blockUuid: string) {
     if (updatedContent !== content) {
       // Update the block
       await logseq.Editor.updateBlock(blockUuid, updatedContent);
-      //   console.log(
-      //     `✅ Block ${blockUuid} content (updated):\n${updatedContent}\n`
-      //   );
     }
   } catch (error) {
     console.error(`❌ Error processing block ${blockUuid}:`, error);
@@ -156,3 +144,10 @@ async function processBlockForURLs(blockUuid: string) {
 
 // Initialize the plugin
 logseq.ready(main).catch(console.error);
+
+// Development mode detection
+if (import.meta.url.includes(`localhost:${DEV_SERVER_PORT}`)) {
+  console.log("🔗 URL to Markdown plugin initialized with HMR");
+} else {
+  console.log("🔗 URL to Markdown plugin initialized");
+}
