@@ -67,12 +67,6 @@ describe("fetchPageTitle from the web", () => {
     return;
   }
 
-  // Set up the real fetch for web tests
-  beforeEach(() => {
-    const {fetch: undiciFetch} = require("undici");
-    global.fetch = undiciFetch;
-  });
-
   realWebTests.forEach(({url, titlePattern}) => {
     it(
       `should fetch real metadata from ${url}`,
@@ -202,12 +196,6 @@ describe("favicon integration", () => {
     });
     return;
   }
-
-  // Set up the real fetch for web tests
-  beforeEach(() => {
-    const {fetch: undiciFetch} = require("undici");
-    global.fetch = undiciFetch;
-  });
 
   it(
     "should process URLs with favicons by default",
