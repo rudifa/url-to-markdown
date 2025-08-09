@@ -41,8 +41,9 @@ build_main() {
     --format=esm \
     --platform=browser
 
-  echo "Copying HTML files..."
+  echo "Copying HTML files and assets..."
   cp index.html dist/index.html
+  cp assets/favicon.svg dist/favicon.svg
 }
 
 build_visual_test() {
