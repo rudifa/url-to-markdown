@@ -7,8 +7,19 @@ set -e
 
 SCRIPT_NAME=$(basename "$0")
 
-# Extract version from package.json reliably
-PKG_VERSION=$(node -p "require('./package.json').version")
+# Extract version from package.json safely with validation
+PKG_VERSION=$(node -e "
+  try {
+    const pkg = JSON.parse(require('fs').readFileSync('./package.json', 'utf8'));
+    if (typeof pkg.version !== 'string' || !pkg.version.match(/^[0-9]+\.[0-9]+\.[0-9]+/)) {
+      throw new Error('Invalid version format');
+    }
+    console.log(pkg.version);
+  } catch (error) {
+    console.error('Error reading package.json version:', error.message);
+    process.exit(1);
+  }
+")
 
 # Common esbuild options
 COMMON_OPTS="--bundle --define:__PKG_VERSION__=\"$PKG_VERSION\""
