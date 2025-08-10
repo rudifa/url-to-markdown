@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir ${{ env.PLUGIN_NAME }}
           cp README.md package.json manifest.json ${{ env.PLUGIN_NAME }}
-          cp assets/favicon.svg ${{ env.PLUGIN_NAME }}/favicon.svg
+          cp favicon.svg ${{ env.PLUGIN_NAME }}/favicon.svg
           # Copy img folder for README.md references
           if [ -d "img" ]; then
             cp -r img ${{ env.PLUGIN_NAME }}/img
