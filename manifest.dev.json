@@ -1,9 +1,9 @@
 {
-    "id": "url-to-markdown-dev",
-    "name": "URL to Markdown (Development)",
-    "main": "index.html",
-    "description": "A Logseq plugin that automatically converts URLs to markdown with titles and favicons - Development Version with HMR",
-    "author": "rudifa",
-    "version": "0.9.2",
-    "icon": "favicon.svg"
+  "id": "url-to-markdown-dev",
+  "name": "URL to Markdown (Development)",
+  "main": "index.html",
+  "description": "A Logseq plugin that automatically converts URLs to markdown with titles and favicons - Development Version with HMR",
+  "author": "rudifa",
+  "version": "0.9.5",
+  "icon": "favicon.svg"
 }
