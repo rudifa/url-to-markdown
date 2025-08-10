@@ -51,11 +51,11 @@ build_main() {
   cp index.html dist/index.html
 
   # Copy favicon with error checking
-  if [[ ! -f assets/favicon.svg ]]; then
-    echo "Error: Source file assets/favicon.svg not found." >&2
+  if [[ ! -f favicon.svg ]]; then
+    echo "Error: Source file favicon.svg not found." >&2
     exit 1
   fi
-  cp assets/favicon.svg dist/favicon.svg
+  cp favicon.svg dist/favicon.svg
 }
 
 build_visual_test() {
@@ -72,7 +72,7 @@ build_visual_test() {
 
   echo "Copying visual test assets..."
   cp assets/visual-test.html dist-dev/visual-test.html
-  cp assets/favicon.svg dist-dev/favicon.svg
+  cp favicon.svg dist-dev/favicon.svg
 }
 
 main() {

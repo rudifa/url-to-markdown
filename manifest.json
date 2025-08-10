@@ -5,6 +5,5 @@
   "description": "A Logseq plugin that automatically converts URLs to markdown with titles and favicons",
   "author": "rudifa",
   "version": "0.9.3",
-  "icon": "./favicon.svg",
-  "logo": "./favicon.svg"
+  "icon": "favicon.svg"
 }
