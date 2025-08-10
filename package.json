@@ -1,6 +1,6 @@
 {
   "name": "url-to-markdown",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "A Logseq plugin that automatically converts URLs to markdown with titles and favicons",
   "main": "dist/index.html",
   "type": "module",
